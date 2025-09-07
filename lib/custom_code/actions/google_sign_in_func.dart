@@ -29,7 +29,7 @@ Future<AuthUserStruct?> googleSignInFunc() async {
     final googleSignIn = GoogleSignIn(
       scopes: ['profile', 'email'],
       clientId: isAndroid
-          ? '1082934337567-htm1qvo0ds4p12p0gbr6gd446j0cjbt8.apps.googleusercontent.com'
+          ? '1082934337567-98a4nbjl1i5u8alea4imfkt2qqdujfi6.apps.googleusercontent.com'
           : '1082934337567-be1hlakt00e77hlifvui8r8jf1tpglnp.apps.googleusercontent.com',
       serverClientId:
           '1082934337567-5s9c01kv2qiom238p2bje6327uv8pnhl.apps.googleusercontent.com',
