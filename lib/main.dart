@@ -27,6 +27,9 @@ void main() async {
   debugLogAppConstant();
 
   await SupaFlow.initialize();
+  
+  // Initialize JWT token
+  initializeJwtToken();
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();

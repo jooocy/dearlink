@@ -25,6 +25,17 @@ bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
 String? _currentJwtToken;
 final jwtTokenStream = SupaFlow.client.auth.onAuthStateChange
     .map(
-      (authState) => _currentJwtToken = authState.session?.accessToken,
+      (authState) {
+        _currentJwtToken = authState.session?.accessToken;
+        print('JWT Token updated: ${_currentJwtToken != null ? "Present" : "Null"}');
+        return _currentJwtToken;
+      },
     )
     .asBroadcastStream();
+
+/// Initialize JWT token on app start
+void initializeJwtToken() {
+  final session = SupaFlow.client.auth.currentSession;
+  _currentJwtToken = session?.accessToken;
+  print('JWT Token initialized: ${_currentJwtToken != null ? "Present" : "Null"}');
+}

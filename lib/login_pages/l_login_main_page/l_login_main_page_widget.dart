@@ -192,7 +192,7 @@ class _LLoginMainPageWidgetState extends State<LLoginMainPageWidget>
                                   return AlertDialog(
                                     title: Text('토큰'),
                                     content:
-                                        Text(_model.customKakaoOAuth!.idToken),
+                                        Text(_model.customKakaoOAuth?.idToken ?? '토큰 없음'),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
@@ -276,7 +276,7 @@ class _LLoginMainPageWidgetState extends State<LLoginMainPageWidget>
                           onTap: () async {
                             _model.customGoogleAuthLogin =
                                 await actions.googleSignInFunc();
-                            if (_model.customGoogleAuthLogin!.hasId()) {
+                            if (_model.customGoogleAuthLogin?.hasId() == true) {
                               FFAppState().authUser = AuthUserStruct(
                                 id: _model.customGoogleAuthLogin?.id,
                                 idToken: _model.customGoogleAuthLogin?.idToken,

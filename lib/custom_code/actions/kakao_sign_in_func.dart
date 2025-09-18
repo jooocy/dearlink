@@ -4,7 +4,7 @@ import '/backend/schema/enums/enums.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'index.dart'; // Imports other custom actions
+import '/custom_code/actions/index.dart'; // Imports other custom actions
 import '/flutter_flow/custom_functions.dart'; // Imports custom functions
 import 'package:flutter/material.dart';
 // Begin custom action code
@@ -23,7 +23,10 @@ Future<AuthUserStruct?> kakaoSignInFunc() async {
 
     // 1) SDK init
     print('[1] KakaoSdk.init');
-    kakao.KakaoSdk.init(nativeAppKey: 'f9174d627b4ce572e5e257a3c52295e8');
+    kakao.KakaoSdk.init(
+      nativeAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
+      javaScriptAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
+    );
 
     // 2) 설치 여부
     final installed = await kakao.isKakaoTalkInstalled();

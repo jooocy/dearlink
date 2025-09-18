@@ -17,7 +17,10 @@ import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
 Future<dynamic> kakaoLoginWithSupabase() async {
   try {
-    KakaoSdk.init(nativeAppKey: 'f9174d627b4ce572e5e257a3c52295e8');
+    KakaoSdk.init(
+      nativeAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
+      javaScriptAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
+    );
 
     // Kakao 로그인 시도
     kakao.OAuthToken token;
