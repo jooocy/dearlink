@@ -385,24 +385,49 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
                                                     FlutterFlowTheme.of(context)
                                                         .secondaryBackground,
                                               ),
-                                              child: Text(
-                                                QuestionsGroup
-                                                    .getAnswersByQuestionCall
-                                                    .myAnswer(
-                                                      (_model.apiResultGetAnswerByQuestion
-                                                              ?.jsonBody ??
-                                                          ''),
-                                                    )!
-                                                    .answerText,
-                                                style:
-                                                    FlutterFlowTheme.of(context)
+                                              child: Builder(
+                                                builder: (context) {
+                                                  // API 응답이 아직 로드되지 않았거나 빈 응답일 때 처리
+                                                  final apiResponse = _model.apiResultGetAnswerByQuestion?.jsonBody;
+                                                  if (apiResponse == null || apiResponse.toString().isEmpty) {
+                                                    return Container(
+                                                      width: MediaQuery.sizeOf(context).width * 1.0,
+                                                      height: 50.0,
+                                                      decoration: BoxDecoration(
+                                                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          '답변을 불러오는 중...',
+                                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                            fontFamily: 'HakgyoansimNadeuriOTF',
+                                                            color: FlutterFlowTheme.of(context).coolGrey90,
+                                                            fontSize: 12.0,
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                  
+                                                  // API 응답에서 답변 텍스트 추출
+                                                  final myAnswer = QuestionsGroup
+                                                      .getAnswersByQuestionCall
+                                                      .myAnswer(apiResponse);
+                                                  
+                                                  final answerText = myAnswer?.answerText ?? '답변이 없습니다.';
+                                                  
+                                                  return Text(
+                                                    answerText,
+                                                    style: FlutterFlowTheme.of(context)
                                                         .bodyMedium
                                                         .override(
-                                                          fontFamily:
-                                                              'HakgyoansimNadeuriOTF',
+                                                          fontFamily: 'HakgyoansimNadeuriOTF',
                                                           fontSize: 18.0,
                                                           letterSpacing: 0.0,
                                                         ),
+                                                  );
+                                                },
                                               ),
                                             ),
                                           ]
@@ -459,13 +484,32 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
                                       decoration: BoxDecoration(),
                                       child: Builder(
                                         builder: (context) {
+                                          // API 응답이 아직 로드되지 않았거나 빈 응답일 때 처리
+                                          final apiResponse = _model.apiResultGetAnswerByQuestion?.jsonBody;
+                                          if (apiResponse == null || apiResponse.toString().isEmpty) {
+                                            return Container(
+                                              width: MediaQuery.sizeOf(context).width * 1.0,
+                                              height: 100.0,
+                                              decoration: BoxDecoration(
+                                                color: FlutterFlowTheme.of(context).secondaryBackground,
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  '다른 답변들을 불러오는 중...',
+                                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                    fontFamily: 'HakgyoansimNadeuriOTF',
+                                                    color: FlutterFlowTheme.of(context).coolGrey90,
+                                                    fontSize: 12.0,
+                                                    letterSpacing: 0.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          
                                           final otherAnswers = QuestionsGroup
                                                   .getAnswersByQuestionCall
-                                                  .otherAnswers(
-                                                    (_model.apiResultGetAnswerByQuestion
-                                                            ?.jsonBody ??
-                                                        ''),
-                                                  )
+                                                  .otherAnswers(apiResponse)
                                                   ?.map((e) => e)
                                                   .toList()
                                                   ?.toList() ??

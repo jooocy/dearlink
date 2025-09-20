@@ -703,9 +703,9 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                             Text(
                                                               AnswerWIthUserStruct
                                                                       .maybeFromMap(
-                                                                          otherAnswersItem)!
-                                                                  .user
-                                                                  .displayName,
+                                                                          otherAnswersItem)
+                                                                  ?.user
+                                                                  .displayName ?? 'Unknown User',
                                                               style: FlutterFlowTheme
                                                                       .of(context)
                                                                   .bodyMedium
