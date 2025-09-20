@@ -19,6 +19,7 @@ import 'index.dart';
 
 import 'dart:async';
 import 'package:easy_debounce/easy_debounce.dart';
+import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,12 @@ void main() async {
   debugLogAppConstant();
 
   await SupaFlow.initialize();
+  
+  // Initialize Kakao SDK
+  KakaoSdk.init(
+    nativeAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
+    javaScriptAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
+  );
   
   // Initialize JWT token
   initializeJwtToken();

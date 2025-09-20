@@ -42,6 +42,17 @@
         <string>dearlink</string>
         </array>
         </dict>
+
+        <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>kakao</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+        <string>kakaoaf9174d627b4ce572e5e257a3c52295e8</string>
+        </array>
+        </dict>
     </array>
     <key>FlutterDeepLinkingEnabled</key>
     <true/>

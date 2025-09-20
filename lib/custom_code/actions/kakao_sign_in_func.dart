@@ -21,19 +21,12 @@ Future<AuthUserStruct?> kakaoSignInFunc() async {
     print('=== KAKAO SIGN-IN START ===');
     print('Platform: ${kIsWeb ? 'Web' : 'Mobile'}');
 
-    // 1) SDK init
-    print('[1] KakaoSdk.init');
-    kakao.KakaoSdk.init(
-      nativeAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
-      javaScriptAppKey: 'f9174d627b4ce572e5e257a3c52295e8',
-    );
-
-    // 2) 설치 여부
+    // 1) 설치 여부 확인
     final installed = await kakao.isKakaoTalkInstalled();
-    print('[2] isKakaoTalkInstalled: $installed');
+    print('[1] isKakaoTalkInstalled: $installed');
 
-    // 3) 로그인
-    print('[3] Try loginWith${installed ? 'KakaoTalk' : 'KakaoAccount'}');
+    // 2) 로그인
+    print('[2] Try loginWith${installed ? 'KakaoTalk' : 'KakaoAccount'}');
     kakao.OAuthToken token = installed
         ? await kakao.UserApi.instance.loginWithKakaoTalk()
         : await kakao.UserApi.instance.loginWithKakaoAccount();
@@ -41,18 +34,18 @@ Future<AuthUserStruct?> kakaoSignInFunc() async {
     if (kDebugMode) {
       final t = token.accessToken;
       print(
-          '[3] accessToken: ${t.isNotEmpty ? '${t.substring(0, 16)}...' : 'EMPTY'}');
+          '[2] accessToken: ${t.isNotEmpty ? '${t.substring(0, 16)}...' : 'EMPTY'}');
     }
 
-    // 4) 카카오 유저
+    // 3) 카카오 유저 정보
     final kakaoUser = await kakao.UserApi.instance.me();
     print(
-        '[4] kakaoUser.id=${kakaoUser.id}, email=${kakaoUser.kakaoAccount?.email}');
+        '[3] kakaoUser.id=${kakaoUser.id}, email=${kakaoUser.kakaoAccount?.email}');
 
-    // 5) Supabase 가입/로그인
+    // 4) Supabase 가입/로그인
     final email = kakaoUser.kakaoAccount?.email ?? '${kakaoUser.id}@kakao.com';
     final password = 'kakao_${kakaoUser.id}';
-    print('[5] Supabase signUp -> email=$email');
+    print('[4] Supabase signUp -> email=$email');
 
     try {
       await SupaFlow.client.auth.signUp(
@@ -65,13 +58,13 @@ Future<AuthUserStruct?> kakaoSignInFunc() async {
           'provider': 'kakao',
         },
       );
-      print('[5] signUp OK');
+      print('[4] signUp OK');
     } on AuthException catch (e) {
-      print('[5] signUp AuthException: ${e.message}');
+      print('[4] signUp AuthException: ${e.message}');
       if (!e.message.contains('already registered')) rethrow;
     }
 
-    print('[6] Supabase signInWithPassword');
+    print('[5] Supabase signInWithPassword');
     final authResponse = await SupaFlow.client.auth.signInWithPassword(
       email: email,
       password: password,
@@ -79,9 +72,9 @@ Future<AuthUserStruct?> kakaoSignInFunc() async {
     final supabaseJWT = authResponse.session?.accessToken ?? '';
     if (kDebugMode) {
       print(
-          '[6] SUPABASE JWT: ${supabaseJWT.isNotEmpty ? '${supabaseJWT.substring(0, 16)}...' : 'EMPTY'}');
+          '[5] SUPABASE JWT: ${supabaseJWT.isNotEmpty ? '${supabaseJWT.substring(0, 16)}...' : 'EMPTY'}');
     }
-    print('[7] DONE');
+    print('[6] DONE');
     return _mapSupabaseUserToAuthUser(authResponse.user, supabaseJWT);
   } on AuthException catch (e, st) {
     print('=== KAKAO SIGN-IN AuthException ===');
