@@ -65,18 +65,21 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
         );
 
         if ((_model.userProfile?.succeeded ?? true)) {
-          FFAppState().userInfo = UserInfoStruct.maybeFromMap(getJsonField(
+          final userInfoData = getJsonField(
             (_model.userProfile?.jsonBody ?? ''),
             r'''$.data''',
-          ))!;
+          );
+          if (userInfoData != null) {
+            FFAppState().userInfo = UserInfoStruct.maybeFromMap(userInfoData) ?? UserInfoStruct();
+          }
           FFAppState().selectedBloodTypeAbo =
               LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
             (_model.userProfile?.jsonBody ?? ''),
-          )!;
+          ) ?? '';
           FFAppState().selectedBloodTypeRh =
               LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
             (_model.userProfile?.jsonBody ?? ''),
-          )!;
+          ) ?? '';
           safeSetState(() {});
         } else {
           await showDialog(
@@ -548,10 +551,18 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                           hoverColor: Colors.transparent,
                                           highlightColor: Colors.transparent,
                                           onTap: () async {
+                                            // 디버깅: 질문 정보 로그
+                                            print('=== DEBUG: Question Clicked ===');
+                                            print('Question ID: ${questionsItem.questionId}');
+                                            print('Question Type: ${questionsItem.questionType}');
+                                            print('Is Answered: ${questionsItem.isAnswered}');
+                                            print('Question Text: ${questionsItem.questionText}');
+                                            
                                             if (questionsItem.isAnswered ==
                                                 true) {
                                               if (questionsItem.questionType ==
                                                   'TEXT') {
+                                                print('=== DEBUG: Going to QAnswerPageWidget ===');
                                                 context.pushNamed(
                                                   QAnswerPageWidget.routeName,
                                                   queryParameters: {
@@ -562,6 +573,7 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                                   }.withoutNulls,
                                                 );
                                               } else {
+                                                print('=== DEBUG: Going to QAnswerSelectPageWidget ===');
                                                 context.pushNamed(
                                                   QAnswerSelectPageWidget
                                                       .routeName,

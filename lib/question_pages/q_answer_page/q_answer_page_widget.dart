@@ -35,6 +35,8 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -42,13 +44,38 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      await _loadAnswerData();
+    });
+  }
+  
+  Future<void> _loadAnswerData() async {
+    // 이미 로딩 중이거나 이미 로드된 경우 스킵
+    if (_isLoading || (_model.apiResultGetAnswerByQuestion != null && _model.apiResultGetAnswerByQuestion?.succeeded == true)) {
+      print('=== DEBUG: QAnswerPage - API already loaded or loading, skipping ===');
+      return;
+    }
+    
+    _isLoading = true;
+    print('=== DEBUG: QAnswerPage - Starting API call for question: ${widget!.question?.questionId} ===');
+    
+    try {
       _model.apiResultGetAnswerByQuestion =
           await QuestionsGroup.getAnswersByQuestionCall.call(
         linkId: FFAppState().linkId,
         questionId: widget!.question?.questionId,
         authToken: currentJwtToken,
       );
-    });
+      print('=== DEBUG: QAnswerPage - API call completed ===');
+      
+      // API 호출 완료 후 UI 업데이트
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('=== DEBUG: QAnswerPage - API call failed: $e ===');
+    } finally {
+      _isLoading = false;
+    }
   }
 
   @override

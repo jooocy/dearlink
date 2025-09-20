@@ -44,7 +44,23 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      print('=== DEBUG: Starting API call ===');
+      await _loadAnswerData();
+    });
+  }
+
+  bool _isLoading = false;
+  
+  Future<void> _loadAnswerData() async {
+    // 이미 로딩 중이거나 이미 로드된 경우 스킵
+    if (_isLoading || (_model.apiResultGetAnswerByQuestion != null && _model.apiResultGetAnswerByQuestion?.succeeded == true)) {
+      print('=== DEBUG: API already loaded or loading, skipping ===');
+      return;
+    }
+    
+    _isLoading = true;
+    print('=== DEBUG: Starting API call for question: ${widget!.question?.questionId} ===');
+    
+    try {
       _model.apiResultGetAnswerByQuestion =
           await QuestionsGroup.getAnswersByQuestionCall.call(
         linkId: FFAppState().linkId,
@@ -58,7 +74,11 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
       if (mounted) {
         setState(() {});
       }
-    });
+    } catch (e) {
+      print('=== DEBUG: API call failed: $e ===');
+    } finally {
+      _isLoading = false;
+    }
   }
 
   @override
@@ -74,6 +94,13 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
   void didUpdateWidget(QAnswerSelectPageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _model.widget = widget;
+    
+    // 질문이 변경되었을 때만 API 호출
+    if (oldWidget.question?.questionId != widget.question?.questionId) {
+      _model.apiResultGetAnswerByQuestion = null; // 기존 결과 초기화
+      _isLoading = false; // 로딩 상태 초기화
+      _loadAnswerData();
+    }
   }
 
   @override
@@ -405,7 +432,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                   );
                                                   print('MyAnswer JSON: $myAnswerJson');
                                                   
-                                                  // selectedOptions 직접 파싱
+                                                  // selectedOptions 직접 파싱 (null 체크 추가)
                                                   final selectedOptionsJson = getJsonField(
                                                     myAnswerJson,
                                                     r'''$.selectedOptions''',
@@ -419,6 +446,13 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                       .toList() ?? [];
                                                   print('Parsed selectedOptions: $mySelectedAnsers');
                                                   print('Count: ${mySelectedAnsers.length}');
+                                                  
+                                                  // TEXT 타입 질문인 경우 selectedOptions가 없을 수 있음
+                                                  final answerText = getJsonField(
+                                                    myAnswerJson,
+                                                    r'''$.answerText''',
+                                                  )?.toString();
+                                                  print('Answer Text: $answerText');
                                                   
                                                   // 무한 루프 방지를 위해 setState 제거
                                                   // API 응답이 완료되면 자동으로 UI가 업데이트됨
@@ -435,6 +469,27 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                     nullable: false,
                                                   );
                                                   debugLogWidgetClass(_model);
+
+                                                  // TEXT 타입 질문인 경우 answerText 표시
+                                                  if (answerText != null && answerText.isNotEmpty) {
+                                                    return Container(
+                                                      width: MediaQuery.sizeOf(context).width * 1.0,
+                                                      padding: EdgeInsets.all(12.0),
+                                                      decoration: BoxDecoration(
+                                                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                        borderRadius: BorderRadius.circular(8.0),
+                                                      ),
+                                                      child: Text(
+                                                        answerText,
+                                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                          fontFamily: 'HakgyoansimNadeuriOTF',
+                                                          color: FlutterFlowTheme.of(context).coolGrey90,
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
 
                                                   return Row(
                                                     mainAxisSize:
