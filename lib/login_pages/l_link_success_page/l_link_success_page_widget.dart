@@ -33,6 +33,9 @@ class _LLinkSuccessPageWidgetState extends State<LLinkSuccessPageWidget>
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool _isProcessing = false;
+  String _statusMessage = '초대를 처리하는 중입니다...';
+
   @override
   void initState() {
     super.initState();
@@ -40,33 +43,74 @@ class _LLinkSuccessPageWidgetState extends State<LLinkSuccessPageWidget>
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      await _processInviteCode();
+    });
+  }
+
+  Future<void> _processInviteCode() async {
+    if (widget!.inviteCode == null || widget!.inviteCode!.isEmpty) {
+      setState(() {
+        _statusMessage = '유효하지 않은 초대 링크입니다.';
+        _isProcessing = false;
+      });
+      await Future.delayed(Duration(seconds: 2));
+      context.pushNamed(LLoginMainPageWidget.routeName);
+      return;
+    }
+
+    setState(() {
+      _isProcessing = true;
+      _statusMessage = '초대를 처리하는 중입니다...';
+    });
+
+    try {
       _model.apiResultci9 = await InviteAPIGroup.joinByCodeCall.call(
         inviteCode: widget!.inviteCode,
         authToken: currentJwtToken,
       );
 
       if ((_model.apiResultci9?.succeeded ?? true)) {
-        await showDialog(
-          context: context,
-          builder: (alertDialogContext) {
-            return AlertDialog(
-              title: Text('축하합니다.'),
-              content: Text('성공'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(alertDialogContext),
-                  child: Text('Ok'),
-                ),
-              ],
-            );
-          },
-        );
+        // 성공 시
+        setState(() {
+          _statusMessage = '초대가 성공적으로 처리되었습니다!';
+          _isProcessing = false;
+        });
 
+        // linkId 업데이트
+        final linkId = getJsonField(
+          (_model.apiResultci9?.jsonBody ?? ''),
+          r'''$.data.mainLinkId''',
+        );
+        if (linkId != null) {
+          FFAppState().linkId = linkId.toString();
+        }
+
+        await Future.delayed(Duration(seconds: 2));
         context.pushNamed(HomePageWidget.routeName);
       } else {
+        // 실패 시
+        final errorMessage = getJsonField(
+          (_model.apiResultci9?.jsonBody ?? ''),
+          r'''$.message''',
+        )?.toString() ?? '초대 처리 중 오류가 발생했습니다.';
+        
+        setState(() {
+          _statusMessage = errorMessage;
+          _isProcessing = false;
+        });
+
+        await Future.delayed(Duration(seconds: 3));
         context.pushNamed(LLoginMainPageWidget.routeName);
       }
-    });
+    } catch (e) {
+      setState(() {
+        _statusMessage = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+        _isProcessing = false;
+      });
+
+      await Future.delayed(Duration(seconds: 3));
+      context.pushNamed(LLoginMainPageWidget.routeName);
+    }
   }
 
   @override
@@ -165,28 +209,55 @@ class _LLinkSuccessPageWidgetState extends State<LLinkSuccessPageWidget>
                     ),
                   ),
                   Text(
-                    '소중한 Link 연결이 \n완료되었어요!',
+                    _isProcessing ? '초대를 처리하고 있어요...' : 
+                    (_model.apiResultci9?.succeeded == true) ? '소중한 Link 연결이 \n완료되었어요!' :
+                    '초대 처리 중 오류가 발생했어요',
                     textAlign: TextAlign.center,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           fontFamily: 'HakgyoansimNadeuriOTF',
-                          color: FlutterFlowTheme.of(context).oceanBlue50,
-                          fontSize: 36.0,
+                          color: _isProcessing ? 
+                            FlutterFlowTheme.of(context).oceanBlue60 :
+                            (_model.apiResultci9?.succeeded == true) ?
+                              FlutterFlowTheme.of(context).oceanBlue50 :
+                              FlutterFlowTheme.of(context).red30,
+                          fontSize: 32.0,
                           letterSpacing: 0.0,
                         ),
                   ),
                   Container(
                     width: 300.0,
-                    height: 50.0,
+                    height: 60.0,
                     decoration: BoxDecoration(),
                     child: Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Text(
-                        '함께하는 사람들과 소중한 대화를 나눠보세요!',
-                        textAlign: TextAlign.center,
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'HakgyoansimNadeuriOTF',
-                              letterSpacing: 0.0,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          if (_isProcessing) ...[
+                            SizedBox(height: 10.0),
+                            SizedBox(
+                              width: 24.0,
+                              height: 24.0,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  FlutterFlowTheme.of(context).oceanBlue60,
+                                ),
+                                strokeWidth: 2.0,
+                              ),
                             ),
+                            SizedBox(height: 10.0),
+                          ],
+                          Text(
+                            _statusMessage,
+                            textAlign: TextAlign.center,
+                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  fontFamily: 'HakgyoansimNadeuriOTF',
+                                  color: FlutterFlowTheme.of(context).coolGrey70,
+                                  fontSize: 14.0,
+                                  letterSpacing: 0.0,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

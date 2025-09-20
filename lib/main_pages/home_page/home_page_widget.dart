@@ -344,6 +344,182 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
+                        // 친구 초대 섹션 (토글 가능)
+                        Container(
+                          width: MediaQuery.sizeOf(context).width * 1.0,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: FlutterFlowTheme.of(context).oceanBlue20,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              // 헤더 (항상 보이는 부분)
+                              InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () {
+                                  setState(() {
+                                    _model.isInviteSectionExpanded = !_model.isInviteSectionExpanded;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Icon(
+                                            Icons.group_add_rounded,
+                                            color: FlutterFlowTheme.of(context).oceanBlue60,
+                                            size: 20.0,
+                                          ),
+                                          SizedBox(width: 8.0),
+                                          Text(
+                                            '친구 초대하기',
+                                            style: FlutterFlowTheme.of(context).titleMedium.override(
+                                              fontFamily: 'HakgyoansimNadeuriOTF',
+                                              color: FlutterFlowTheme.of(context).oceanBlue70,
+                                              fontSize: 16.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      AnimatedRotation(
+                                        turns: _model.isInviteSectionExpanded ? 0.5 : 0.0,
+                                        duration: Duration(milliseconds: 200),
+                                        child: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: FlutterFlowTheme.of(context).oceanBlue50,
+                                          size: 24.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // 펼쳐지는 부분
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                height: _model.isInviteSectionExpanded ? null : 0,
+                                child: _model.isInviteSectionExpanded
+                                    ? Padding(
+                                        padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            Text(
+                                              '소중한 사람들과 함께 질문을 나눠보세요',
+                                              style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                fontFamily: 'HakgyoansimNadeuriOTF',
+                                                color: FlutterFlowTheme.of(context).coolGrey70,
+                                                fontSize: 12.0,
+                                                letterSpacing: 0.0,
+                                              ),
+                                            ),
+                                            SizedBox(height: 16.0),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Expanded(
+                                                  child: FFButtonWidget(
+                                                    onPressed: () async {
+                                                      _model.getInviteCode = await InviteAPIGroup
+                                                          .getOrCreateActiveInviteCodeCall
+                                                          .call(
+                                                        authToken: currentJwtToken,
+                                                        linkId: FFAppState().linkId,
+                                                      );
+
+                                                      if ((_model.getInviteCode?.succeeded ?? true)) {
+                                                        await actions.shareText(
+                                                          '${FFAppConstants.kUrlScheme}/linkSuccessPage?inviteCode=${InviteAPIGroup.getOrCreateActiveInviteCodeCall.code(
+                                                            (_model.getInviteCode?.jsonBody ?? ''),
+                                                          )}',
+                                                        );
+                                                      }
+                                                      safeSetState(() {});
+                                                    },
+                                                    text: '링크로 초대',
+                                                    icon: Icon(
+                                                      Icons.share_rounded,
+                                                      size: 16.0,
+                                                    ),
+                                                    options: FFButtonOptions(
+                                                      width: double.infinity,
+                                                      height: 40.0,
+                                                      padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                                                      iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 8.0, 0.0),
+                                                      color: FlutterFlowTheme.of(context).oceanBlue60,
+                                                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                                        fontFamily: 'HakgyoansimNadeuriTTF',
+                                                        color: Colors.white,
+                                                        fontSize: 14.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                      elevation: 0.0,
+                                                      borderRadius: BorderRadius.circular(8.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 12.0),
+                                                Expanded(
+                                                  child: FFButtonWidget(
+                                                    onPressed: () async {
+                                                      context.pushNamed(InviteCodePageWidget.routeName);
+                                                    },
+                                                    text: '코드 입력',
+                                                    icon: Icon(
+                                                      Icons.keyboard_rounded,
+                                                      size: 16.0,
+                                                    ),
+                                                    options: FFButtonOptions(
+                                                      width: double.infinity,
+                                                      height: 40.0,
+                                                      padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                                                      iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 8.0, 0.0),
+                                                      color: FlutterFlowTheme.of(context).coolGrey0,
+                                                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                                        fontFamily: 'HakgyoansimNadeuriTTF',
+                                                        color: FlutterFlowTheme.of(context).oceanBlue60,
+                                                        fontSize: 14.0,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                      elevation: 0.0,
+                                                      borderSide: BorderSide(
+                                                        color: FlutterFlowTheme.of(context).oceanBlue30,
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius: BorderRadius.circular(8.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : SizedBox.shrink(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20.0),
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           height: 50.0,

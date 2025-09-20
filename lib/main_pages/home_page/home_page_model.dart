@@ -26,6 +26,14 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
 
   bool get hasLinkusers => _hasLinkusers;
 
+  bool _isInviteSectionExpanded = false;
+  set isInviteSectionExpanded(bool value) {
+    _isInviteSectionExpanded = value;
+    debugLogWidgetClass(this);
+  }
+
+  bool get isInviteSectionExpanded => _isInviteSectionExpanded;
+
   ///  State fields for stateful widgets in this page.
 
   // Stores action output result for [Backend Call - API (Get My Main Link)] action in HomePage widget.
