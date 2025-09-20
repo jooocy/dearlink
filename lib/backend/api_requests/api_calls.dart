@@ -842,6 +842,15 @@ class GetAnswersByQuestionCall {
         r'''$.data.otherAnswers''',
         true,
       ) as List?;
+  List<String>? selectedOptionAnswers(dynamic response) => (getJsonField(
+        response,
+        r'''$.data.myAnswer.selectedOptions''',
+        true,
+      ) as List?)
+          ?.withoutNulls
+          .map((x) => castToType<String>(x))
+          .withoutNulls
+          .toList();
 }
 
 class GetUnanswerdRandomQuestionCall {

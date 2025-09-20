@@ -65,27 +65,18 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
         );
 
         if ((_model.userProfile?.succeeded ?? true)) {
-          final userInfoData = UserInfoStruct.maybeFromMap(getJsonField(
+          FFAppState().userInfo = UserInfoStruct.maybeFromMap(getJsonField(
             (_model.userProfile?.jsonBody ?? ''),
             r'''$.data''',
-          ));
-          if (userInfoData != null) {
-            FFAppState().userInfo = userInfoData;
-          }
-          
-          final bloodTypeAbo = LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
+          ))!;
+          FFAppState().selectedBloodTypeAbo =
+              LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
             (_model.userProfile?.jsonBody ?? ''),
-          );
-          if (bloodTypeAbo != null) {
-            FFAppState().selectedBloodTypeAbo = bloodTypeAbo;
-          }
-          
-          final bloodTypeRh = LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
+          )!;
+          FFAppState().selectedBloodTypeRh =
+              LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
             (_model.userProfile?.jsonBody ?? ''),
-          );
-          if (bloodTypeRh != null) {
-            FFAppState().selectedBloodTypeRh = bloodTypeRh;
-          }
+          )!;
           safeSetState(() {});
         } else {
           await showDialog(

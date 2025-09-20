@@ -48,10 +48,6 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
         questionId: widget!.question?.questionId,
         authToken: currentJwtToken,
       );
-      // API 호출 후 UI 업데이트
-      if (mounted) {
-        setState(() {});
-      }
     });
   }
 
@@ -369,7 +365,8 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
                                                       (_model.apiResultGetAnswerByQuestion
                                                               ?.jsonBody ??
                                                           ''),
-                                                    )?.answerText ?? '답변을 불러올 수 없습니다',
+                                                    )!
+                                                    .answerText,
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium

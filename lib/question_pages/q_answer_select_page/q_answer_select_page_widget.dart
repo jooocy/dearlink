@@ -44,12 +44,20 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      print('=== DEBUG: Starting API call ===');
       _model.apiResultGetAnswerByQuestion =
           await QuestionsGroup.getAnswersByQuestionCall.call(
         linkId: FFAppState().linkId,
         questionId: widget!.question?.questionId,
         authToken: currentJwtToken,
       );
+      print('=== DEBUG: API call completed ===');
+      print('API Response: ${_model.apiResultGetAnswerByQuestion?.jsonBody}');
+      
+      // API 호출 완료 후 UI 업데이트
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -362,28 +370,68 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                               ),
                                               child: Builder(
                                                 builder: (context) {
-                                                  final mySelectedAnsers =
-                                                      QuestionsGroup
-                                                              .getAnswersByQuestionCall
-                                                              .myAnswer(
-                                                                (_model.apiResultGetAnswerByQuestion
-                                                                        ?.jsonBody ??
-                                                                    ''),
-                                                              )
-                                                              ?.selectedOptions
-                                                              ?.map((e) => e)
-                                                              .toList()
-                                                              ?.toList() ??
-                                                          [];
+                                                  // API 응답이 아직 로드되지 않았거나 빈 응답일 때 처리
+                                                  final apiResponse = _model.apiResultGetAnswerByQuestion?.jsonBody;
+                                                  if (apiResponse == null || apiResponse.toString().isEmpty) {
+                                                    print('=== DEBUG: API not loaded yet ===');
+                                                    return Container(
+                                                      width: MediaQuery.sizeOf(context).width * 1.0,
+                                                      height: 50.0,
+                                                      decoration: BoxDecoration(
+                                                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          '답변을 불러오는 중...',
+                                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                            fontFamily: 'HakgyoansimNadeuriOTF',
+                                                            color: FlutterFlowTheme.of(context).coolGrey90,
+                                                            fontSize: 12.0,
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                  
+                                                  // API 응답 전체 로그
+                                                  print('=== DEBUG: API Response ===');
+                                                  print('Full API Response: ${_model.apiResultGetAnswerByQuestion?.jsonBody}');
+                                                  
+                                                  // myAnswer 부분만 추출해서 로그
+                                                  final myAnswerJson = getJsonField(
+                                                    _model.apiResultGetAnswerByQuestion?.jsonBody ?? '',
+                                                    r'''$.data.myAnswer''',
+                                                  );
+                                                  print('MyAnswer JSON: $myAnswerJson');
+                                                  
+                                                  // selectedOptions 직접 파싱
+                                                  final selectedOptionsJson = getJsonField(
+                                                    myAnswerJson,
+                                                    r'''$.selectedOptions''',
+                                                    true,
+                                                  ) as List?;
+                                                  print('SelectedOptions JSON: $selectedOptionsJson');
+                                                  print('SelectedOptions Type: ${selectedOptionsJson.runtimeType}');
+                                                  
+                                                  final mySelectedAnsers = selectedOptionsJson
+                                                      ?.map((e) => e.toString())
+                                                      .toList() ?? [];
+                                                  print('Parsed selectedOptions: $mySelectedAnsers');
+                                                  print('Count: ${mySelectedAnsers.length}');
+                                                  
+                                                  // 무한 루프 방지를 위해 setState 제거
+                                                  // API 응답이 완료되면 자동으로 UI가 업데이트됨
+                                                  
                                                   _model.debugGeneratorVariables[
                                                           'mySelectedAnsers${mySelectedAnsers.length > 100 ? ' (first 100)' : ''}'] =
                                                       debugSerializeParam(
                                                     mySelectedAnsers.take(100),
-                                                    ParamType.DataStruct,
+                                                    ParamType.String,
                                                     isList: true,
                                                     link:
                                                         'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=Q_AnswerSelectPage',
-                                                    name: 'QuestionOption',
+                                                    name: 'String',
                                                     nullable: false,
                                                   );
                                                   debugLogWidgetClass(_model);
@@ -415,8 +463,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                               AlignmentDirectional(
                                                                   0.0, 0.0),
                                                           child: Text(
-                                                            mySelectedAnsersItem
-                                                                .label,
+                                                            mySelectedAnsersItem,
                                                             style: FlutterFlowTheme
                                                                     .of(context)
                                                                 .bodyMedium
@@ -692,86 +739,61 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                                 ),
                                                               ],
                                                             ),
-                                                            Builder(
-                                                              builder:
-                                                                  (context) {
-                                                                final otherSelectedAnsers = AnswerWIthUserStruct.maybeFromMap(
-                                                                            otherAnswersItem)
-                                                                        ?.selectedOptions
-                                                                        ?.map((e) =>
-                                                                            e)
-                                                                        .toList()
-                                                                        ?.toList() ??
-                                                                    [];
-                                                                _model.debugGeneratorVariables[
-                                                                        'otherSelectedAnsers${otherSelectedAnsers.length > 100 ? ' (first 100)' : ''}'] =
-                                                                    debugSerializeParam(
-                                                                  otherSelectedAnsers
-                                                                      .take(
-                                                                          100),
-                                                                  ParamType
-                                                                      .DataStruct,
-                                                                  isList: true,
-                                                                  link:
-                                                                      'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=Q_AnswerSelectPage',
-                                                                  name:
-                                                                      'QuestionOption',
-                                                                  nullable:
-                                                                      false,
-                                                                );
-                                                                debugLogWidgetClass(
-                                                                    _model);
-
-                                                                return Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  children: List.generate(
-                                                                      otherSelectedAnsers
-                                                                          .length,
-                                                                      (otherSelectedAnsersIndex) {
-                                                                    final otherSelectedAnsersItem =
-                                                                        otherSelectedAnsers[
-                                                                            otherSelectedAnsersIndex];
-                                                                    return Container(
-                                                                      width:
-                                                                          46.0,
-                                                                      height:
-                                                                          24.0,
-                                                                      decoration:
-                                                                          BoxDecoration(
-                                                                        color: FlutterFlowTheme.of(context)
-                                                                            .oceabSkyGra,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(8.0),
-                                                                      ),
-                                                                      child:
-                                                                          Align(
-                                                                        alignment: AlignmentDirectional(
-                                                                            0.0,
-                                                                            0.0),
-                                                                        child:
-                                                                            Text(
-                                                                          otherSelectedAnsersItem
-                                                                              .label,
-                                                                          style: FlutterFlowTheme.of(context)
-                                                                              .bodyMedium
-                                                                              .override(
-                                                                                fontFamily: 'HakgyoansimNadeuriOTF',
-                                                                                color: FlutterFlowTheme.of(context).oceanBlue70,
-                                                                                fontSize: 12.0,
-                                                                                letterSpacing: 0.0,
-                                                                              ),
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  }).divide(
-                                                                      SizedBox(
-                                                                          width:
-                                                                              5.0)),
-                                                                );
-                                                              },
-                                                            ),
+                                                             Builder(
+                                                               builder: (context) {
+                                                                 // otherAnswers의 selectedOptions 디버깅
+                                                                 print('=== DEBUG: OtherAnswer ===');
+                                                                 print('OtherAnswerItem: $otherAnswersItem');
+                                                                 
+                                                                 final selectedOptionsJson = getJsonField(
+                                                                   otherAnswersItem,
+                                                                   r'''$.selectedOptions''',
+                                                                   true,
+                                                                 ) as List?;
+                                                                 print('Other SelectedOptions JSON: $selectedOptionsJson');
+                                                                 print('Other SelectedOptions Type: ${selectedOptionsJson.runtimeType}');
+                                                                 
+                                                                 final selectedOptions = selectedOptionsJson
+                                                                     ?.map((e) => e.toString())
+                                                                     .toList() ?? [];
+                                                                 print('Other Parsed selectedOptions: $selectedOptions');
+                                                                 print('Other Count: ${selectedOptions.length}');
+                                                                 
+                                                                 // 무한 루프 방지를 위해 setState 제거
+                                                                 // API 응답이 완료되면 자동으로 UI가 업데이트됨
+                                                                 
+                                                                 return Row(
+                                                                   mainAxisSize: MainAxisSize.max,
+                                                                   children: List.generate(
+                                                                     selectedOptions.length,
+                                                                     (index) {
+                                                                       final option = selectedOptions[index];
+                                                                       print('Creating tag for option: $option');
+                                                                       return Container(
+                                                                         width: 46.0,
+                                                                         height: 24.0,
+                                                                         decoration: BoxDecoration(
+                                                                           color: FlutterFlowTheme.of(context).oceabSkyGra,
+                                                                           borderRadius: BorderRadius.circular(8.0),
+                                                                         ),
+                                                                         child: Align(
+                                                                           alignment: AlignmentDirectional(0.0, 0.0),
+                                                                           child: Text(
+                                                                             option,
+                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                               fontFamily: 'HakgyoansimNadeuriOTF',
+                                                                               color: FlutterFlowTheme.of(context).oceanBlue70,
+                                                                               fontSize: 12.0,
+                                                                               letterSpacing: 0.0,
+                                                                             ),
+                                                                           ),
+                                                                         ),
+                                                                       );
+                                                                     },
+                                                                   ).divide(SizedBox(width: 5.0)),
+                                                                 );
+                                                               },
+                                                             ),
                                                           ]
                                                               .divide(SizedBox(
                                                                   height: 12.0))
