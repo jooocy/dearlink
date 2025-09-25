@@ -666,6 +666,10 @@ class QuestionsGroup {
       GenerateDailyQuestionCall();
   static GenerateDailyQuestionTestCall generateDailyQuestionTestCall =
       GenerateDailyQuestionTestCall();
+  static GenerateTestQuestionsCall generateTestQuestionsCall =
+      GenerateTestQuestionsCall();
+  static DeleteAllTestQuestionsCall deleteAllTestQuestionsCall =
+      DeleteAllTestQuestionsCall();
 }
 
 class GetQuestionsCall {
@@ -1113,6 +1117,79 @@ String _serializeJson(dynamic jsonVar, [bool isList = false]) {
       print("Json serialization failed. Returning empty json.");
     }
     return isList ? '[]' : '{}';
+  }
+}
+
+/// 테스트용 질문 생성 API 호출 클래스
+class GenerateTestQuestionsCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = QuestionsGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    final ffApiRequestBody = '''
+{
+  "linkId": "$linkId"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'generateTestQuestions',
+      apiUrl: '${baseUrl}/test/link/$linkId/generate',
+      callType: ApiCallType.POST,
+      headers: {
+        ...QuestionsGroup.headers,
+        'Authorization': authToken,
+        'Content-Type': 'application/json',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+/// 테스트용 질문 전체 삭제 API 호출 클래스
+class DeleteAllTestQuestionsCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = QuestionsGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'deleteAllTestQuestions',
+      apiUrl: '${baseUrl}/test/link/$linkId/all',
+      callType: ApiCallType.DELETE,
+      headers: {
+        ...QuestionsGroup.headers,
+        'Authorization': authToken,
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
   }
 }
 

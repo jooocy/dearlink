@@ -240,26 +240,168 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                         decoration: BoxDecoration(),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                _model.apiResultxlm = await QuestionsGroup
-                                    .generateDailyQuestionTestCall
-                                    .call();
+                            // 테스트용 질문 관리 버튼들
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                  splashColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () async {
+                                    _model.apiResultxlm = await QuestionsGroup
+                                        .generateDailyQuestionTestCall
+                                        .call();
 
-                                safeSetState(() {});
-                              },
-                              child: Icon(
-                                FFIcons.khearticon,
-                                color: Color(0xFFFF8D8D),
-                                size: 24.0,
-                              ),
+                                    safeSetState(() {});
+                                  },
+                                  child: Icon(
+                                    FFIcons.khearticon,
+                                    color: Color(0xFFFF8D8D),
+                                    size: 24.0,
+                                  ),
+                                ),
+                                // 테스트용 버튼들
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // 질문 생성 버튼
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        try {
+                                          final response = await QuestionsGroup.generateTestQuestionsCall.call(
+                                            linkId: FFAppState().linkId,
+                                            authToken: currentJwtToken,
+                                          );
+                                          
+                                          if (response?.succeeded ?? false) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('테스트 질문 2개가 생성되었습니다!'),
+                                                backgroundColor: Colors.green,
+                                              ),
+                                            );
+                                            // 질문 목록 새로고침
+                                            safeSetState(() => _model.apiRequestCompleter = null);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('질문 생성에 실패했습니다.'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('오류: $e'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(20.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.3),
+                                              blurRadius: 4.0,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          '질문 생성',
+                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                            fontFamily: 'HakgyoansimNadeuriOTF',
+                                            color: Colors.white,
+                                            fontSize: 14.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.0),
+                                    // 질문 삭제 버튼
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        try {
+                                          final response = await QuestionsGroup.deleteAllTestQuestionsCall.call(
+                                            linkId: FFAppState().linkId,
+                                            authToken: currentJwtToken,
+                                          );
+                                          
+                                          if (response?.succeeded ?? false) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('모든 테스트 질문이 삭제되었습니다!'),
+                                                backgroundColor: Colors.orange,
+                                              ),
+                                            );
+                                            // 질문 목록 새로고침
+                                            safeSetState(() => _model.apiRequestCompleter = null);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('질문 삭제에 실패했습니다.'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('오류: $e'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.circular(20.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.3),
+                                              blurRadius: 4.0,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          '질문 삭제',
+                                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                            fontFamily: 'HakgyoansimNadeuriOTF',
+                                            color: Colors.white,
+                                            fontSize: 14.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                             Container(
                               width: 65.0,
