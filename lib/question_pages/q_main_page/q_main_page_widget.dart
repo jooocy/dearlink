@@ -310,9 +310,9 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                         }
                                       },
                                       child: Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                                         decoration: BoxDecoration(
-                                          color: Colors.green,
+                                          color: Colors.blue.withOpacity(0.5), // 70% 투명도
                                           borderRadius: BorderRadius.circular(20.0),
                                           boxShadow: [
                                             BoxShadow(
@@ -375,9 +375,9 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                         }
                                       },
                                       child: Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                                         decoration: BoxDecoration(
-                                          color: Colors.red,
+                                          color: Colors.grey.withOpacity(0.2), // 70% 투명도. 
                                           borderRadius: BorderRadius.circular(20.0),
                                           boxShadow: [
                                             BoxShadow(
