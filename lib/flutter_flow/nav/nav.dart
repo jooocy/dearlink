@@ -67,7 +67,9 @@ const debugRouteLinkMap = {
   '/qSelectPage':
       'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=Q_SelectPage',
   '/answerSelect':
-      'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=Q_AnswerSelectPage'
+      'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=Q_AnswerSelectPage',
+  '/moodSelect':
+      'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=MoodSelectPage'
 };
 
 class AppStateNotifier extends ChangeNotifier {
@@ -366,6 +368,19 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: QAnswerSelectPageWidget.routePath,
           requireAuth: true,
           builder: (context, params) => QAnswerSelectPageWidget(
+            question: params.getParam(
+              'question',
+              ParamType.DataStruct,
+              isList: false,
+              structBuilder: QuestionStruct.fromSerializableMap,
+            ),
+          ),
+        ),
+        FFRoute(
+          name: MoodSelectPageWidget.routeName,
+          path: MoodSelectPageWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => MoodSelectPageWidget(
             question: params.getParam(
               'question',
               ParamType.DataStruct,

@@ -34,3 +34,5 @@ export '/question_pages/q_select_page/q_select_page_widget.dart'
     show QSelectPageWidget;
 export '/question_pages/q_answer_select_page/q_answer_select_page_widget.dart'
     show QAnswerSelectPageWidget;
+export '/mood_pages/mood_select_page/mood_select_page_widget.dart'
+    show MoodSelectPageWidget;

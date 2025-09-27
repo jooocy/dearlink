@@ -104,6 +104,46 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
     });
   }
 
+  
+  Future<void> _routeToQuestionPage(QuestionStruct question) async {
+    if (question.questionType == 'TEXT') {
+      print('=== DEBUG: Going to QTextPageWidget ===');
+      context.pushNamed(
+        QTextPageWidget.routeName,
+        queryParameters: {
+          'question': serializeParam(
+            question,
+            ParamType.DataStruct,
+          ),
+        }.withoutNulls,
+      );
+    } else if (question.questionType == 'SINGLE_SELECT' && question.options.length == 2) {
+      print('=== DEBUG: Going to QOXPageWidget (O/X) ===');
+      print('Options: ${question.options}');
+      context.pushNamed(
+        QOXPageWidget.routeName,
+        queryParameters: {
+          'question': serializeParam(
+            question,
+            ParamType.DataStruct,
+          ),
+        }.withoutNulls,
+      );
+    } else {
+      print('=== DEBUG: Going to QSelectPageWidget (Multiple) ===');
+      print('Options: ${question.options}');
+      context.pushNamed(
+        QSelectPageWidget.routeName,
+        queryParameters: {
+          'question': serializeParam(
+            question,
+            ParamType.DataStruct,
+          ),
+        }.withoutNulls,
+      );
+    }
+  }
+
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
@@ -746,49 +786,10 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                                 );
                                               }
                                             } else {
-                                              print('=== DEBUG: Question not answered, routing based on type ===');
-                                              if (questionsItem.questionType ==
-                                                  'TEXT') {
-                                                print('=== DEBUG: Going to QTextPageWidget ===');
-                                                context.pushNamed(
-                                                  QTextPageWidget.routeName,
-                                                  queryParameters: {
-                                                    'question': serializeParam(
-                                                      questionsItem,
-                                                      ParamType.DataStruct,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              } else if ((questionsItem
-                                                          .questionType ==
-                                                      'SINGLE_SELECT') &&
-                                                  (questionsItem
-                                                          .options.length ==
-                                                      2)) {
-                                                print('=== DEBUG: Going to QOXPageWidget (O/X) ===');
-                                                print('Options: ${questionsItem.options}');
-                                                context.pushNamed(
-                                                  QOXPageWidget.routeName,
-                                                  queryParameters: {
-                                                    'question': serializeParam(
-                                                      questionsItem,
-                                                      ParamType.DataStruct,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              } else {
-                                                print('=== DEBUG: Going to QSelectPageWidget (Multiple) ===');
-                                                print('Options: ${questionsItem.options}');
-                                                context.pushNamed(
-                                                  QSelectPageWidget.routeName,
-                                                  queryParameters: {
-                                                    'question': serializeParam(
-                                                      questionsItem,
-                                                      ParamType.DataStruct,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              }
+                                              print('=== DEBUG: Question not answered, routing to question page ===');
+                                              
+                                              // 답변하지 않은 질문은 바로 답변 페이지로 이동
+                                              await _routeToQuestionPage(questionsItem);
                                             }
                                           },
                                           child: Container(

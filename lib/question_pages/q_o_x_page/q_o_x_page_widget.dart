@@ -90,6 +90,70 @@ class _QOXPageWidgetState extends State<QOXPageWidget> with RouteAware {
     _model.isRouteVisible = false;
   }
 
+  Future<void> _checkMoodAndRoute(QuestionStruct question) async {
+    print('=== DEBUG: Checking mood status for linkId: ${FFAppState().linkId} ===');
+    try {
+      final moodStatusResponse = await MoodAPIGroup.getMoodStatusCall.call(
+        linkId: FFAppState().linkId,
+        authToken: currentJwtToken,
+      );
+
+      if (moodStatusResponse?.succeeded ?? false) {
+        final hasRecordedToday = MoodAPIGroup.getMoodStatusCall.hasRecordedToday(
+          moodStatusResponse?.jsonBody,
+        );
+        
+        print('=== DEBUG: Has recorded mood today: $hasRecordedToday ===');
+        
+        if (hasRecordedToday == false) {
+          print('=== DEBUG: Redirecting to mood select page ===');
+          context.pushNamed(
+            MoodSelectPageWidget.routeName,
+            queryParameters: {
+              'question': serializeParam(
+                question,
+                ParamType.DataStruct,
+              ),
+            }.withoutNulls,
+          );
+        } else {
+          print('=== DEBUG: Mood already selected, routing to answer page ===');
+          context.pushNamed(
+            QAnswerSelectPageWidget.routeName,
+            queryParameters: {
+              'question': serializeParam(
+                question,
+                ParamType.DataStruct,
+              ),
+            }.withoutNulls,
+          );
+        }
+      } else {
+        print('=== DEBUG: Failed to check mood status, routing to answer page ===');
+        context.pushNamed(
+          QAnswerSelectPageWidget.routeName,
+          queryParameters: {
+            'question': serializeParam(
+              question,
+              ParamType.DataStruct,
+            ),
+          }.withoutNulls,
+        );
+      }
+    } catch (e) {
+      print('=== DEBUG: Error checking mood status: $e, routing to answer page ===');
+      context.pushNamed(
+        QAnswerSelectPageWidget.routeName,
+        queryParameters: {
+          'question': serializeParam(
+            question,
+            ParamType.DataStruct,
+          ),
+        }.withoutNulls,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     DebugFlutterFlowModelContext.maybeOf(context)
@@ -422,15 +486,8 @@ class _QOXPageWidgetState extends State<QOXPageWidget> with RouteAware {
                         );
 
                         if ((_model.saveAnswer?.succeeded ?? true)) {
-                          context.pushNamed(
-                            QAnswerSelectPageWidget.routeName,
-                            queryParameters: {
-                              'question': serializeParam(
-                                widget!.question,
-                                ParamType.DataStruct,
-                              ),
-                            }.withoutNulls,
-                          );
+                          // 답변 저장 후 감정 상태 확인
+                          await _checkMoodAndRoute(widget!.question!);
                         } else {
                           await showDialog(
                             context: context,

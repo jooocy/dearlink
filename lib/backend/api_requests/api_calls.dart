@@ -670,6 +670,11 @@ class QuestionsGroup {
       GenerateTestQuestionsCall();
   static DeleteAllTestQuestionsCall deleteAllTestQuestionsCall =
       DeleteAllTestQuestionsCall();
+  static SaveMoodCall saveMoodCall = SaveMoodCall();
+  static GetMoodCall getMoodCall = GetMoodCall();
+  static GetMoodByDateCall getMoodByDateCall = GetMoodByDateCall();
+  static GetMoodStatusCall getMoodStatusCall = GetMoodStatusCall();
+  static GetMoodOptionsCall getMoodOptionsCall = GetMoodOptionsCall();
 }
 
 class GetQuestionsCall {
@@ -1192,6 +1197,227 @@ class DeleteAllTestQuestionsCall {
     );
   }
 }
+
+/// Start Mood API Group Code
+
+class MoodAPIGroup {
+  static String getBaseUrl({
+    String? authToken,
+    String? apiBaseUrl,
+  }) {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    return '${apiBaseUrl}/mood';
+  }
+
+  static Map<String, String> headers = {
+    'Authorization': '[authToken]',
+  };
+  static SaveMoodCall saveMoodCall = SaveMoodCall();
+  static GetMoodCall getMoodCall = GetMoodCall();
+  static GetMoodByDateCall getMoodByDateCall = GetMoodByDateCall();
+  static GetMoodStatusCall getMoodStatusCall = GetMoodStatusCall();
+  static GetMoodOptionsCall getMoodOptionsCall = GetMoodOptionsCall();
+}
+
+class SaveMoodCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? moodValue = '',
+    String? moodLabel = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = MoodAPIGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    final ffApiRequestBody = '''
+{
+  "linkId": "${escapeStringForJson(linkId)}",
+  "moodValue": "${escapeStringForJson(moodValue)}",
+  "moodLabel": "${escapeStringForJson(moodLabel)}"
+}''';
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Save Mood',
+      apiUrl: '${baseUrl}/daily',
+      callType: ApiCallType.POST,
+      headers: {
+        'Authorization': '${authToken}',
+        'Content-Type': 'application/json',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetMoodCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = MoodAPIGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Mood',
+      apiUrl: '${baseUrl}/daily/${linkId}',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': '${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  MoodStruct? mood(dynamic response) => MoodStruct.maybeFromMap(getJsonField(
+        response,
+        r'''$.data.data''',
+      ));
+}
+
+class GetMoodByDateCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? date = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = MoodAPIGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Mood By Date',
+      apiUrl: '${baseUrl}/daily/${linkId}/${date}',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': '${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  MoodStruct? mood(dynamic response) => MoodStruct.maybeFromMap(getJsonField(
+        response,
+        r'''$.data.data''',
+      ));
+}
+
+class GetMoodStatusCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = MoodAPIGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Mood Status',
+      apiUrl: '${baseUrl}/status/${linkId}',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': '${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  bool? hasRecordedToday(dynamic response) => getJsonField(
+        response,
+        r'''$.data.data.hasRecordedToday''',
+      ) as bool?;
+
+  String? date(dynamic response) => getJsonField(
+        response,
+        r'''$.data.data.date''',
+      )?.toString();
+}
+
+class GetMoodOptionsCall {
+  Future<ApiCallResponse> call({
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = MoodAPIGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get Mood Options',
+      apiUrl: '${baseUrl}/options',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': '${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  List<MoodOptionStruct>? options(dynamic response) => (getJsonField(
+        response,
+        r'''$.data.data.options''',
+        true,
+      ) as List?)
+          ?.withoutNulls
+          .map((x) => MoodOptionStruct.maybeFromMap(x))
+          .withoutNulls
+          .toList();
+}
+
+/// End Mood API Group Code
 
 String? escapeStringForJson(String? input) {
   if (input == null) {
