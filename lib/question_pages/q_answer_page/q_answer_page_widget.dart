@@ -36,6 +36,7 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = false;
+  String _currentMood = '';
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await _loadAnswerData();
+      await _loadCurrentMood();
     });
   }
   
@@ -75,6 +77,45 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
       print('=== DEBUG: QAnswerPage - API call failed: $e ===');
     } finally {
       _isLoading = false;
+    }
+  }
+
+  Future<void> _loadCurrentMood() async {
+    try {
+      print('=== DEBUG: QAnswerPage - Loading current mood ===');
+      print('=== DEBUG: LinkId: ${FFAppState().linkId} ===');
+      
+      final moodResponse = await MoodAPIGroup.getMoodCall.call(
+        linkId: FFAppState().linkId,
+        authToken: currentJwtToken,
+      );
+      
+      print('=== DEBUG: Mood API response: ${moodResponse?.succeeded} ===');
+      print('=== DEBUG: Mood API body: ${moodResponse?.jsonBody} ===');
+      
+      if (moodResponse?.succeeded ?? false) {
+        final mood = MoodAPIGroup.getMoodCall.mood(
+          moodResponse?.jsonBody ?? '',
+        );
+        
+        print('=== DEBUG: Parsed mood: $mood ===');
+        
+        if (mood != null) {
+          final moodLabel = mood.moodLabel ?? '';
+          print('=== DEBUG: Mood label: $moodLabel ===');
+          
+          setState(() {
+            _currentMood = moodLabel;
+          });
+          print('=== DEBUG: _currentMood set to: $_currentMood ===');
+        } else {
+          print('=== DEBUG: Mood is null ===');
+        }
+      } else {
+        print('=== DEBUG: Failed to load current mood - API failed ===');
+      }
+    } catch (e) {
+      print('=== DEBUG: Error loading current mood: $e ===');
     }
   }
 
@@ -131,6 +172,7 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    print('=== DEBUG: QAnswerPage build() called - _currentMood: $_currentMood ===');
     DebugFlutterFlowModelContext.maybeOf(context)
         ?.parentModelCallback
         ?.call(_model);
@@ -356,12 +398,8 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
                                                         AlignmentDirectional(
                                                             0.0, 0.0),
                                                     child: Text(
-                                                      '#행복',
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMedium
-                                                              .override(
+                                                      _currentMood.isNotEmpty ? '#$_currentMood' : '#행복',
+                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                 fontFamily:
                                                                     'HakgyoansimNadeuriOTF',
                                                                 color: FlutterFlowTheme.of(
@@ -682,11 +720,8 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
                                                                             0.0,
                                                                             0.0),
                                                                     child: Text(
-                                                                      '#행복',
-                                                                      style: FlutterFlowTheme.of(
-                                                                              context)
-                                                                          .bodyMedium
-                                                                          .override(
+                                                                      _currentMood.isNotEmpty ? '#$_currentMood' : '#행복',
+                                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                             fontFamily:
                                                                                 'HakgyoansimNadeuriOTF',
                                                                             color:

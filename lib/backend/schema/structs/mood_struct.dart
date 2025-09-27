@@ -111,12 +111,10 @@ class MoodStruct extends BaseStruct {
         moodValue: data['moodValue'] as String?,
         moodLabel: data['moodLabel'] as String?,
         createdAt: data['createdAt'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(
-                data['createdAt'] as int, isUtc: true)
+            ? DateTime.parse(data['createdAt'] as String)
             : null,
         updatedAt: data['updatedAt'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(
-                data['updatedAt'] as int, isUtc: true)
+            ? DateTime.parse(data['updatedAt'] as String)
             : null,
       );
 

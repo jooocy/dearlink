@@ -50,10 +50,12 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       print('=== DEBUG: PostFrameCallback triggered ===');
       await _loadAnswerData();
+      await _loadCurrentMood();
     });
   }
 
   bool _isLoading = false;
+  String _currentMood = '';
   
   Future<void> _loadAnswerData() async {
     // 이미 로딩 중이거나 이미 로드된 경우 스킵
@@ -83,6 +85,33 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
       print('=== DEBUG: API call failed: $e ===');
     } finally {
       _isLoading = false;
+    }
+  }
+
+  Future<void> _loadCurrentMood() async {
+    try {
+      print('=== DEBUG: Loading current mood ===');
+      final moodResponse = await MoodAPIGroup.getMoodCall.call(
+        linkId: FFAppState().linkId,
+        authToken: currentJwtToken,
+      );
+      
+      if (moodResponse?.succeeded ?? false) {
+        final mood = MoodAPIGroup.getMoodCall.mood(
+          moodResponse?.jsonBody ?? '',
+        );
+        
+        if (mood != null) {
+          setState(() {
+            _currentMood = mood.moodLabel ?? '';
+          });
+          print('=== DEBUG: Current mood loaded: $_currentMood ===');
+        }
+      } else {
+        print('=== DEBUG: Failed to load current mood ===');
+      }
+    } catch (e) {
+      print('=== DEBUG: Error loading current mood: $e ===');
     }
   }
 
@@ -377,7 +406,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                         AlignmentDirectional(
                                                             0.0, 0.0),
                                                     child: Text(
-                                                      '#행복',
+                                                      _currentMood.isNotEmpty ? '#$_currentMood' : '#행복',
                                                       style:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -799,7 +828,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                                             0.0,
                                                                             0.0),
                                                                     child: Text(
-                                                                      '#행복',
+                                                                      _currentMood.isNotEmpty ? '#$_currentMood' : '#행복',
                                                                       style: FlutterFlowTheme.of(
                                                                               context)
                                                                           .bodyMedium
