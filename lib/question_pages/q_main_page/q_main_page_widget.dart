@@ -162,12 +162,24 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
         ?.call(_model);
     context.watch<FFAppState>();
 
+    print('=== DEBUG: Starting QuestionsGroup.getAnswersCall API ===');
+    print('Link ID: ${FFAppState().linkId}');
+    print('Auth Token: ${currentJwtToken != null ? "Present" : "Missing"}');
+    
     return FutureBuilder<ApiCallResponse>(
       future: QuestionsGroup.getAnswersCall.call(
         linkId: FFAppState().linkId,
         authToken: currentJwtToken,
       ),
       builder: (context, snapshot) {
+        print('=== DEBUG: getAnswersCall FutureBuilder state: ${snapshot.connectionState} ===');
+        if (snapshot.hasError) {
+          print('=== DEBUG: getAnswersCall Error: ${snapshot.error} ===');
+        }
+        if (snapshot.hasData) {
+          print('=== DEBUG: getAnswersCall Response received ===');
+          print('Response Body: ${snapshot.data?.bodyText}');
+        }
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
           return Scaffold(
@@ -653,6 +665,12 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                               desc: true)
                                           ?.toList() ??
                                       [];
+                                  
+                                  print('=== DEBUG: Parsed questions count: ${questions.length} ===');
+                                  for (int i = 0; i < questions.length; i++) {
+                                    final q = questions[i];
+                                    print('Question $i: ID=${q.questionId}, Type=${q.questionType}, Options=${q.options}, IsAnswered=${q.isAnswered}');
+                                  }
                                   _model.debugGeneratorVariables[
                                           'questions${questions.length > 100 ? ' (first 100)' : ''}'] =
                                       debugSerializeParam(
@@ -728,8 +746,10 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                                 );
                                               }
                                             } else {
+                                              print('=== DEBUG: Question not answered, routing based on type ===');
                                               if (questionsItem.questionType ==
                                                   'TEXT') {
+                                                print('=== DEBUG: Going to QTextPageWidget ===');
                                                 context.pushNamed(
                                                   QTextPageWidget.routeName,
                                                   queryParameters: {
@@ -745,6 +765,8 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                                   (questionsItem
                                                           .options.length ==
                                                       2)) {
+                                                print('=== DEBUG: Going to QOXPageWidget (O/X) ===');
+                                                print('Options: ${questionsItem.options}');
                                                 context.pushNamed(
                                                   QOXPageWidget.routeName,
                                                   queryParameters: {
@@ -755,6 +777,8 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
                                                   }.withoutNulls,
                                                 );
                                               } else {
+                                                print('=== DEBUG: Going to QSelectPageWidget (Multiple) ===');
+                                                print('Options: ${questionsItem.options}');
                                                 context.pushNamed(
                                                   QSelectPageWidget.routeName,
                                                   queryParameters: {

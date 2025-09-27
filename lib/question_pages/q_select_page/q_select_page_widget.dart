@@ -36,6 +36,13 @@ class _QSelectPageWidgetState extends State<QSelectPageWidget> with RouteAware {
   @override
   void initState() {
     super.initState();
+    print('=== DEBUG: QSelectPage initState() called ===');
+    print('Question ID: ${widget.question?.questionId}');
+    print('Question Text: ${widget.question?.questionText}');
+    print('Question Type: ${widget.question?.questionType}');
+    print('Options: ${widget.question?.options}');
+    print('Options Length: ${widget.question?.options?.length ?? 0}');
+    
     _model = createModel(context, () => QSelectPageModel());
   }
 
@@ -92,6 +99,9 @@ class _QSelectPageWidgetState extends State<QSelectPageWidget> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    print('=== DEBUG: QSelectPage build() called ===');
+    print('Options in build: ${widget.question?.options}');
+    
     DebugFlutterFlowModelContext.maybeOf(context)
         ?.parentModelCallback
         ?.call(_model);

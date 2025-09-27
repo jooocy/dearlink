@@ -123,13 +123,40 @@ class QuestionStruct extends BaseStruct {
         questionId: data['questionId'] as String?,
         questionText: data['questionText'] as String?,
         questionType: data['questionType'] as String?,
-        options: getStructList(
-          data['options'],
-          QuestionOptionStruct.fromMap,
-        ),
+        options: _parseOptions(data['options']),
         orderIndex: castToType<int>(data['orderIndex']),
         isAnswered: data['isAnswered'] as bool?,
       );
+
+  static List<QuestionOptionStruct>? _parseOptions(dynamic optionsData) {
+    if (optionsData == null) return null;
+    
+    // 이미 QuestionOptionStruct 객체들의 리스트인 경우
+    if (optionsData is List && optionsData.isNotEmpty && optionsData.first is Map) {
+      return getStructList(optionsData, QuestionOptionStruct.fromMap);
+    }
+    
+    // 문자열 배열인 경우 QuestionOptionStruct로 변환
+    if (optionsData is List) {
+      return optionsData
+          .map((option) {
+            if (option is String) {
+              return QuestionOptionStruct(
+                value: option,
+                label: option,
+              );
+            } else if (option is Map) {
+              return QuestionOptionStruct.fromMap(option.cast<String, dynamic>());
+            }
+            return null;
+          })
+          .where((element) => element != null)
+          .cast<QuestionOptionStruct>()
+          .toList();
+    }
+    
+    return null;
+  }
 
   static QuestionStruct? maybeFromMap(dynamic data) =>
       data is Map ? QuestionStruct.fromMap(data.cast<String, dynamic>()) : null;

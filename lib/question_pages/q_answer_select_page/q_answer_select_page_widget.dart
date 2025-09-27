@@ -40,10 +40,15 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
   @override
   void initState() {
     super.initState();
+    print('=== DEBUG: QAnswerSelectPage initState() called ===');
+    print('Question ID: ${widget.question?.questionId}');
+    print('Question Text: ${widget.question?.questionText}');
+    
     _model = createModel(context, () => QAnswerSelectPageModel());
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      print('=== DEBUG: PostFrameCallback triggered ===');
       await _loadAnswerData();
     });
   }
@@ -141,6 +146,12 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
 
   @override
   Widget build(BuildContext context) {
+    print('=== DEBUG: QAnswerSelectPage build() called ===');
+    print('Question ID: ${widget.question?.questionId}');
+    print('Question Text: ${widget.question?.questionText}');
+    print('API Result: ${_model.apiResultGetAnswerByQuestion?.succeeded}');
+    print('Is Loading: $_isLoading');
+    
     DebugFlutterFlowModelContext.maybeOf(context)
         ?.parentModelCallback
         ?.call(_model);
@@ -397,10 +408,14 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                               ),
                                               child: Builder(
                                                 builder: (context) {
+                                                  print('=== DEBUG: Builder for my answer called ===');
+                                                  print('API Result: ${_model.apiResultGetAnswerByQuestion?.succeeded}');
+                                                  print('API Body: ${_model.apiResultGetAnswerByQuestion?.jsonBody}');
+                                                  
                                                   // API 응답이 아직 로드되지 않았거나 빈 응답일 때 처리
                                                   final apiResponse = _model.apiResultGetAnswerByQuestion?.jsonBody;
                                                   if (apiResponse == null || apiResponse.toString().isEmpty) {
-                                                    print('=== DEBUG: API not loaded yet ===');
+                                                    print('=== DEBUG: API not loaded yet - showing loading message ===');
                                                     return Container(
                                                       width: MediaQuery.sizeOf(context).width * 1.0,
                                                       height: 50.0,
@@ -422,7 +437,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                   }
                                                   
                                                   // API 응답 전체 로그
-                                                  print('=== DEBUG: API Response ===');
+                                                  print('=== DEBUG: API Response available ===');
                                                   print('Full API Response: ${_model.apiResultGetAnswerByQuestion?.jsonBody}');
                                                   
                                                   // myAnswer 부분만 추출해서 로그
@@ -431,6 +446,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                     r'''$.data.myAnswer''',
                                                   );
                                                   print('MyAnswer JSON: $myAnswerJson');
+                                                  print('MyAnswer Type: ${myAnswerJson.runtimeType}');
                                                   
                                                   // selectedOptions 직접 파싱 (null 체크 추가)
                                                   final selectedOptionsJson = getJsonField(
@@ -472,6 +488,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
 
                                                   // TEXT 타입 질문인 경우 answerText 표시
                                                   if (answerText != null && answerText.isNotEmpty) {
+                                                    print('=== DEBUG: Showing answerText: $answerText ===');
                                                     return Container(
                                                       width: MediaQuery.sizeOf(context).width * 1.0,
                                                       padding: EdgeInsets.all(12.0),
@@ -491,6 +508,9 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                                     );
                                                   }
 
+                                                  print('=== DEBUG: Showing selectedOptions with ${mySelectedAnsers.length} items ===');
+                                                  print('SelectedOptions: $mySelectedAnsers');
+                                                  
                                                   return Row(
                                                     mainAxisSize:
                                                         MainAxisSize.max,
@@ -596,6 +616,7 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                       decoration: BoxDecoration(),
                                       child: Builder(
                                         builder: (context) {
+                                          print('=== DEBUG: Builder for other answers called ===');
                                           final otherAnswers = QuestionsGroup
                                                   .getAnswersByQuestionCall
                                                   .otherAnswers(
@@ -619,6 +640,9 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
                                             nullable: false,
                                           );
                                           debugLogWidgetClass(_model);
+
+                                          print('=== DEBUG: OtherAnswers count: ${otherAnswers.length} ===');
+                                          print('=== DEBUG: OtherAnswers: $otherAnswers ===');
 
                                           return ListView.separated(
                                             padding: EdgeInsets.zero,
