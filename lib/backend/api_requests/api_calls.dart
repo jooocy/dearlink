@@ -23,6 +23,8 @@ class SupabaseAuthenticationGroup {
 
   static Map<String, String> headers = {};
   static KakaoCall kakaoCall = KakaoCall();
+  static EmailPasswordRegisterCall emailPasswordRegisterCall = EmailPasswordRegisterCall();
+  static EmailPasswordLoginCall emailPasswordLoginCall = EmailPasswordLoginCall();
 }
 
 class KakaoCall {
@@ -48,6 +50,106 @@ class KakaoCall {
       alwaysAllowBody: false,
     );
   }
+}
+
+class EmailPasswordRegisterCall {
+  Future<ApiCallResponse> call({
+    String? email,
+    String? password,
+    String? nickname,
+    String? apiBaseUrl,
+  }) async {
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = SupabaseAuthenticationGroup.getBaseUrl(
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    final ffApiRequestBody = '''
+{
+  "email": "${escapeStringForJson(email)}",
+  "password": "${escapeStringForJson(password)}",
+  "nickname": "${escapeStringForJson(nickname)}"
+}''';
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Email Password Register',
+      apiUrl: '${baseUrl}/email-password/register',
+      callType: ApiCallType.POST,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  String? accessToken(dynamic response) => getJsonField(
+        response,
+        r'''$.data.accessToken''',
+        true,
+      ) as String?;
+
+  String? refreshToken(dynamic response) => getJsonField(
+        response,
+        r'''$.data.refreshToken''',
+        true,
+      ) as String?;
+}
+
+class EmailPasswordLoginCall {
+  Future<ApiCallResponse> call({
+    String? email,
+    String? password,
+    String? apiBaseUrl,
+  }) async {
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = SupabaseAuthenticationGroup.getBaseUrl(
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    final ffApiRequestBody = '''
+{
+  "email": "${escapeStringForJson(email)}",
+  "password": "${escapeStringForJson(password)}"
+}''';
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Email Password Login',
+      apiUrl: '${baseUrl}/email-password/login',
+      callType: ApiCallType.POST,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  String? accessToken(dynamic response) => getJsonField(
+        response,
+        r'''$.data.accessToken''',
+        true,
+      ) as String?;
+
+  String? refreshToken(dynamic response) => getJsonField(
+        response,
+        r'''$.data.refreshToken''',
+        true,
+      ) as String?;
 }
 
 /// End Supabase Authentication Group Code

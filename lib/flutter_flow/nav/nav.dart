@@ -28,6 +28,10 @@ const kTransitionInfoKey = '__transition_info__';
 GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 const debugRouteLinkMap = {
+  '/emailPasswordLoginPage':
+      'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=EmailPasswordLoginPage',
+  '/emailPasswordRegisterPage':
+      'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=EmailPasswordRegisterPage',
   '/lLoginMainPage':
       'https://app.flutterflow.io/project/dear-link-em0ufw?tab=uiBuilder&page=L_LoginMainPage',
   '/lLinkTargetPage':
@@ -138,6 +142,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: '/',
           builder: (context, _) =>
               appStateNotifier.loggedIn ? NavBarPage() : LLoginMainPageWidget(),
+        ),
+        FFRoute(
+          name: EmailPasswordLoginPageWidget.routeName,
+          path: EmailPasswordLoginPageWidget.routePath,
+          builder: (context, params) => EmailPasswordLoginPageWidget(),
+        ),
+        FFRoute(
+          name: EmailPasswordRegisterPageWidget.routeName,
+          path: EmailPasswordRegisterPageWidget.routePath,
+          builder: (context, params) => EmailPasswordRegisterPageWidget(),
         ),
         FFRoute(
           name: LLoginMainPageWidget.routeName,

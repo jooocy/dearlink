@@ -1,4 +1,8 @@
 // Export pages
+export '/login_pages/email_password_login_page/email_password_login_page_widget.dart'
+    show EmailPasswordLoginPageWidget;
+export '/login_pages/email_password_register_page/email_password_register_page_widget.dart'
+    show EmailPasswordRegisterPageWidget;
 export '/login_pages/l_login_main_page/l_login_main_page_widget.dart'
     show LLoginMainPageWidget;
 export '/login_pages/l_link_target_page/l_link_target_page_widget.dart'

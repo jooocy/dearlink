@@ -755,8 +755,8 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
                                         Container(
                                           height: 24.0,
                                           constraints: BoxConstraints(
-                                            minWidth: 50.0,
-                                            maxWidth: 80.0,
+                                            minWidth: 60.0,
+                                            maxWidth: 120.0,
                                           ),
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -773,20 +773,25 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
                                                 
                                                 print('=== DEBUG: HomePage - Displaying mood for user ${linkUsersItem.userId} (${linkUsersItem.nickname}): $displayText ===');
                                                 
-                                                return Text(
-                                                  displayText,
-                                                  textAlign: TextAlign.center,
-                                                  style: FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily:
-                                                            'HakgyoansimNadeuriOTF',
-                                                        color: hasMood
-                                                            ? FlutterFlowTheme.of(context).oceanBlue70
-                                                            : FlutterFlowTheme.of(context).coolGrey80,
-                                                        fontSize: 12.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
+                                                return Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 4.0),
+                                                  child: Text(
+                                                    displayText,
+                                                    textAlign: TextAlign.center,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                    style: FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily:
+                                                              'HakgyoansimNadeuriOTF',
+                                                          color: hasMood
+                                                              ? FlutterFlowTheme.of(context).oceanBlue70
+                                                              : FlutterFlowTheme.of(context).coolGrey80,
+                                                          fontSize: 10.0,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
                                                 );
                                               },
                                             ),

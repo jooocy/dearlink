@@ -117,9 +117,9 @@ class _LLoginMainPageWidgetState extends State<LLoginMainPageWidget>
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
                 child: Container(
                   width: MediaQuery.sizeOf(context).width * 1.0,
-                  height: 120.0,
+                  height: 180.0,
                   constraints: BoxConstraints(
-                    minHeight: 120.0,
+                    minHeight: 180.0,
                     maxHeight: 600.0,
                   ),
                   decoration: BoxDecoration(),
@@ -357,6 +357,44 @@ class _LLoginMainPageWidgetState extends State<LLoginMainPageWidget>
                                     .bodyLarge
                                     .override(
                                       fontFamily: 'HakgyoansimNadeuriOTF',
+                                      letterSpacing: 0.0,
+                                    ),
+                              ),
+                            ].divide(SizedBox(width: 12.0)),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.sizeOf(context).width * 0.9,
+                        height: 52.0,
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context).oceanBlue60,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () async {
+                            context.pushNamed(EmailPasswordLoginPageWidget.routeName);
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.email_rounded,
+                                color: Colors.white,
+                                size: 20.0,
+                              ),
+                              Text(
+                                '이메일로 시작하기',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyLarge
+                                    .override(
+                                      fontFamily: 'HakgyoansimNadeuriOTF',
+                                      color: Colors.white,
                                       letterSpacing: 0.0,
                                     ),
                               ),
