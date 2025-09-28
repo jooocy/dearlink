@@ -71,6 +71,9 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
             ))!
                 .isNotEmpty;
         safeSetState(() {});
+        
+        // Load moods for all users
+        await _loadUserMoods();
       } else {
         context.pushNamed(LLinkTargetPageWidget.routeName);
       }
@@ -126,6 +129,55 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
   @override
   void didPushNext() {
     _model.isRouteVisible = false;
+  }
+
+  // Load moods for all users
+  Future<void> _loadUserMoods() async {
+    try {
+      print('=== DEBUG: HomePage - Starting to load user moods ===');
+      print('=== DEBUG: LinkId: ${FFAppState().linkId} ===');
+      
+      final allMoodsResponse = await MoodAPIGroup.getAllMoodsCall.call(
+        linkId: FFAppState().linkId,
+        authToken: currentJwtToken,
+      );
+      
+      print('=== DEBUG: All moods API response: ${allMoodsResponse?.succeeded} ===');
+      print('=== DEBUG: All moods API body: ${allMoodsResponse?.jsonBody} ===');
+      
+      if (allMoodsResponse?.succeeded ?? false) {
+        final moods = MoodAPIGroup.getAllMoodsCall.moods(
+          allMoodsResponse?.jsonBody ?? '',
+        );
+        
+        print('=== DEBUG: Parsed moods: $moods ===');
+        print('=== DEBUG: Moods count: ${moods?.length ?? 0} ===');
+        
+        Map<String, String> userMoods = {};
+        
+        if (moods != null) {
+          for (final mood in moods) {
+            print('=== DEBUG: Processing mood for userId: ${mood.userId}, moodLabel: ${mood.moodLabel} ===');
+            if (mood.userId?.isNotEmpty == true && mood.moodLabel?.isNotEmpty == true) {
+              userMoods[mood.userId!] = mood.moodLabel!;
+              print('=== DEBUG: Added mood for ${mood.userId}: ${mood.moodLabel} ===');
+            }
+          }
+        }
+        
+        print('=== DEBUG: Final userMoods map: $userMoods ===');
+        _model.userMoods = userMoods;
+      } else {
+        print('=== DEBUG: All moods API failed ===');
+        _model.userMoods = {};
+      }
+      
+      safeSetState(() {});
+      print('=== DEBUG: HomePage - Finished loading user moods ===');
+    } catch (e) {
+      print('=== DEBUG: Error loading user moods: $e ===');
+      _model.userMoods = {};
+    }
   }
 
   @override
@@ -703,7 +755,8 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
                                         Container(
                                           height: 24.0,
                                           constraints: BoxConstraints(
-                                            minWidth: 80.0,
+                                            minWidth: 50.0,
+                                            maxWidth: 80.0,
                                           ),
                                           decoration: BoxDecoration(
                                             color: FlutterFlowTheme.of(context)
@@ -711,20 +764,32 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
                                             borderRadius:
                                                 BorderRadius.circular(8.0),
                                           ),
-                                          child: Text(
-                                            '답변 전이에요.',
-                                            textAlign: TextAlign.center,
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      'HakgyoansimNadeuriOTF',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .coolGrey80,
-                                                  fontSize: 12.0,
-                                                  letterSpacing: 0.0,
-                                                ),
+                                          child: Center(
+                                            child: Builder(
+                                              builder: (context) {
+                                                final userMood = _model.userMoods[linkUsersItem.userId];
+                                                final hasMood = userMood?.isNotEmpty == true;
+                                                final displayText = hasMood ? '#$userMood' : '답변 전이에요.';
+                                                
+                                                print('=== DEBUG: HomePage - Displaying mood for user ${linkUsersItem.userId} (${linkUsersItem.nickname}): $displayText ===');
+                                                
+                                                return Text(
+                                                  displayText,
+                                                  textAlign: TextAlign.center,
+                                                  style: FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'HakgyoansimNadeuriOTF',
+                                                        color: hasMood
+                                                            ? FlutterFlowTheme.of(context).oceanBlue70
+                                                            : FlutterFlowTheme.of(context).coolGrey80,
+                                                        fontSize: 12.0,
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                                );
+                                              },
+                                            ),
                                           ),
                                         ),
                                       ],

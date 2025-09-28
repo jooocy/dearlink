@@ -54,6 +54,15 @@ class HomePageModel extends FlutterFlowModel<HomePageWidget> {
 
   ApiCallResponse? get getInviteCode => _getInviteCode;
 
+  // Store moods for each user
+  Map<String, String> _userMoods = {};
+  set userMoods(Map<String, String> value) {
+    _userMoods = value;
+    debugLogWidgetClass(this);
+  }
+
+  Map<String, String> get userMoods => _userMoods;
+
   final Map<String, DebugDataField> debugGeneratorVariables = {};
   final Map<String, DebugDataField> debugBackendQueries = {};
   final Map<String, FlutterFlowModel> widgetBuilderComponents = {};

@@ -1218,6 +1218,7 @@ class MoodAPIGroup {
   static GetMoodByDateCall getMoodByDateCall = GetMoodByDateCall();
   static GetMoodStatusCall getMoodStatusCall = GetMoodStatusCall();
   static GetMoodOptionsCall getMoodOptionsCall = GetMoodOptionsCall();
+  static GetAllMoodsCall getAllMoodsCall = GetAllMoodsCall();
 }
 
 class SaveMoodCall {
@@ -1413,6 +1414,47 @@ class GetMoodOptionsCall {
       ) as List?)
           ?.withoutNulls
           .map((x) => MoodOptionStruct.maybeFromMap(x))
+          .withoutNulls
+          .toList();
+}
+
+class GetAllMoodsCall {
+  Future<ApiCallResponse> call({
+    String? linkId = '',
+    String? authToken,
+    String? apiBaseUrl,
+  }) async {
+    authToken ??= FFAppConstants.kAuthToken;
+    apiBaseUrl ??= FFAppConstants.kBaseUrl;
+    final baseUrl = MoodAPIGroup.getBaseUrl(
+      authToken: authToken,
+      apiBaseUrl: apiBaseUrl,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'Get All Moods',
+      apiUrl: '${baseUrl}/daily/all/${linkId}',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': '${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  List<MoodStruct>? moods(dynamic response) => (getJsonField(
+        response,
+        r'''$.data.data.moods''',
+        true,
+      ) as List?)
+          ?.withoutNulls
+          .map((x) => MoodStruct.maybeFromMap(x))
           .withoutNulls
           .toList();
 }

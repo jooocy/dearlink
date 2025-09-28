@@ -12,6 +12,8 @@ class MoodStruct extends BaseStruct {
     String? date,
     String? moodValue,
     String? moodLabel,
+    String? nickname,
+    bool? hasRecorded,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : _id = id,
@@ -20,6 +22,8 @@ class MoodStruct extends BaseStruct {
         _date = date,
         _moodValue = moodValue,
         _moodLabel = moodLabel,
+        _nickname = nickname,
+        _hasRecorded = hasRecorded,
         _createdAt = createdAt,
         _updatedAt = updatedAt;
 
@@ -103,6 +107,26 @@ class MoodStruct extends BaseStruct {
 
   bool hasUpdatedAt() => _updatedAt != null;
 
+  // "nickname" field.
+  String? _nickname;
+  String get nickname => _nickname ?? '';
+  set nickname(String? val) {
+    _nickname = val;
+    debugLog();
+  }
+
+  bool hasNickname() => _nickname != null;
+
+  // "hasRecorded" field.
+  bool? _hasRecorded;
+  bool get hasRecorded => _hasRecorded ?? false;
+  set hasRecorded(bool? val) {
+    _hasRecorded = val;
+    debugLog();
+  }
+
+  bool hasHasRecorded() => _hasRecorded != null;
+
   static MoodStruct fromMap(Map<String, dynamic> data) => MoodStruct(
         id: data['id'] as String?,
         userId: data['userId'] as String?,
@@ -110,6 +134,8 @@ class MoodStruct extends BaseStruct {
         date: data['date'] as String?,
         moodValue: data['moodValue'] as String?,
         moodLabel: data['moodLabel'] as String?,
+        nickname: data['nickname'] as String?,
+        hasRecorded: data['hasRecorded'] as bool?,
         createdAt: data['createdAt'] != null
             ? DateTime.parse(data['createdAt'] as String)
             : null,
@@ -128,6 +154,8 @@ class MoodStruct extends BaseStruct {
         'date': _date,
         'moodValue': _moodValue,
         'moodLabel': _moodLabel,
+        'nickname': _nickname,
+        'hasRecorded': _hasRecorded,
         'createdAt': _createdAt?.millisecondsSinceEpoch,
         'updatedAt': _updatedAt?.millisecondsSinceEpoch,
       }.withoutNulls;
@@ -157,6 +185,14 @@ class MoodStruct extends BaseStruct {
         'moodLabel': serializeParam(
           _moodLabel,
           ParamType.String,
+        ),
+        'nickname': serializeParam(
+          _nickname,
+          ParamType.String,
+        ),
+        'hasRecorded': serializeParam(
+          _hasRecorded,
+          ParamType.bool,
         ),
         'createdAt': serializeParam(
           _createdAt,
@@ -198,6 +234,16 @@ class MoodStruct extends BaseStruct {
         moodLabel: deserializeParam(
           data['moodLabel'],
           ParamType.String,
+          false,
+        ),
+        nickname: deserializeParam(
+          data['nickname'],
+          ParamType.String,
+          false,
+        ),
+        hasRecorded: deserializeParam(
+          data['hasRecorded'],
+          ParamType.bool,
           false,
         ),
         createdAt: deserializeParam(
@@ -250,6 +296,18 @@ class MoodStruct extends BaseStruct {
           name: 'String',
           nullable: false,
         ),
+        'nickname': debugSerializeParam(
+          nickname,
+          ParamType.String,
+          name: 'String',
+          nullable: false,
+        ),
+        'hasRecorded': debugSerializeParam(
+          hasRecorded,
+          ParamType.bool,
+          name: 'bool',
+          nullable: false,
+        ),
         'createdAt': debugSerializeParam(
           createdAt,
           ParamType.DateTime,
@@ -276,6 +334,8 @@ class MoodStruct extends BaseStruct {
         date == other.date &&
         moodValue == other.moodValue &&
         moodLabel == other.moodLabel &&
+        nickname == other.nickname &&
+        hasRecorded == other.hasRecorded &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt;
   }
@@ -288,6 +348,8 @@ class MoodStruct extends BaseStruct {
         date,
         moodValue,
         moodLabel,
+        nickname,
+        hasRecorded,
         createdAt,
         updatedAt,
       ]);
