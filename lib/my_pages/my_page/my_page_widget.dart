@@ -42,15 +42,18 @@ class _MyPageWidgetState extends State<MyPageWidget> with RouteAware {
       );
 
       if ((_model.getMyMainLinkRes?.succeeded ?? true)) {
-        FFAppState().linkUsers = LinksAPIGroup.getMyMainLinkCall
-            .others(
-              (_model.getMyMainLinkRes?.jsonBody ?? ''),
-            )!
-            .toList()
-            .cast<LinkUserStruct>();
-        FFAppState().linkname = LinksAPIGroup.getMyMainLinkCall.linkName(
-          (_model.getMyMainLinkRes?.jsonBody ?? ''),
-        )!;
+        final jsonBody = _model.getMyMainLinkRes?.jsonBody ?? '';
+        
+        // Parse API response once and reuse the results
+        final linkUserOthers = LinksAPIGroup.getMyMainLinkCall.others(jsonBody);
+        final linkName = LinksAPIGroup.getMyMainLinkCall.linkName(jsonBody);
+        
+        if (linkUserOthers != null) {
+          FFAppState().linkUsers = linkUserOthers.toList().cast<LinkUserStruct>();
+        }
+        if (linkName != null) {
+          FFAppState().linkname = linkName;
+        }
         safeSetState(() {});
         _model.userProfile =
             await LinkUserProfileAPIGroup.getOrCreateLinkUserCall.call(
@@ -60,18 +63,27 @@ class _MyPageWidgetState extends State<MyPageWidget> with RouteAware {
         );
 
         if ((_model.userProfile?.succeeded ?? true)) {
-          FFAppState().userInfo = UserInfoStruct.maybeFromMap(getJsonField(
+          final userInfoData = UserInfoStruct.maybeFromMap(getJsonField(
             (_model.userProfile?.jsonBody ?? ''),
             r'''$.data''',
-          ))!;
-          FFAppState().selectedBloodTypeAbo =
-              LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
+          ));
+          if (userInfoData != null) {
+            FFAppState().userInfo = userInfoData;
+          }
+          
+          final bloodTypeAbo = LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
             (_model.userProfile?.jsonBody ?? ''),
-          )!;
-          FFAppState().selectedBloodTypeRh =
-              LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
+          );
+          if (bloodTypeAbo != null) {
+            FFAppState().selectedBloodTypeAbo = bloodTypeAbo;
+          }
+          
+          final bloodTypeRh = LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
             (_model.userProfile?.jsonBody ?? ''),
-          )!;
+          );
+          if (bloodTypeRh != null) {
+            FFAppState().selectedBloodTypeRh = bloodTypeRh;
+          }
           safeSetState(() {});
         } else {
           await showDialog(
@@ -280,23 +292,34 @@ class _MyPageWidgetState extends State<MyPageWidget> with RouteAware {
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                   ),
-                                                  child: Image.network(
-                                                    LinksAPIGroup
-                                                        .getMyMainLinkCall
-                                                        .me(
-                                                          (_model.getMyMainLinkRes
-                                                                  ?.jsonBody ??
-                                                              ''),
-                                                        )!
-                                                        .profileImageUrl,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                            error,
-                                                            stackTrace) =>
-                                                        Image.asset(
-                                                      'assets/images/error_image.png',
-                                                      fit: BoxFit.cover,
-                                                    ),
+                                                  child: Builder(
+                                                    builder: (context) {
+                                                      final meData = LinksAPIGroup
+                                                          .getMyMainLinkCall
+                                                          .me(
+                                                            (_model.getMyMainLinkRes
+                                                                    ?.jsonBody ??
+                                                                ''),
+                                                          );
+                                                      if (meData?.profileImageUrl?.isNotEmpty == true) {
+                                                        return Image.network(
+                                                          meData!.profileImageUrl,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (context,
+                                                                  error,
+                                                                  stackTrace) =>
+                                                              Image.asset(
+                                                            'assets/images/error_image.png',
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        return Image.asset(
+                                                          'assets/images/error_image.png',
+                                                          fit: BoxFit.cover,
+                                                        );
+                                                      }
+                                                    },
                                                   ),
                                                 ),
                                                 Align(
@@ -557,7 +580,7 @@ class _MyPageWidgetState extends State<MyPageWidget> with RouteAware {
                                                                             0.0),
                                                                         child:
                                                                             Text(
-                                                                          'your@email.com',
+                                                                          currentUserEmail.isNotEmpty ? currentUserEmail : '이메일 정보 없음',
                                                                           style: FlutterFlowTheme.of(context)
                                                                               .bodyMedium
                                                                               .override(
@@ -708,7 +731,7 @@ class _MyPageWidgetState extends State<MyPageWidget> with RouteAware {
                                                                           1.0,
                                                                           0.0),
                                                                   child: Text(
-                                                                    'V 0.1.0',
+                                                                    'V 0.5.6',
                                                                     style: FlutterFlowTheme.of(
                                                                             context)
                                                                         .bodyMedium

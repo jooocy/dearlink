@@ -49,8 +49,11 @@ class _QAnswerSelectPageWidgetState extends State<QAnswerSelectPageWidget>
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       print('=== DEBUG: PostFrameCallback triggered ===');
-      await _loadAnswerData();
-      await _loadCurrentMood();
+      // Parallel API calls for better performance
+      await Future.wait([
+        _loadAnswerData(),
+        _loadCurrentMood(),
+      ]);
     });
   }
 

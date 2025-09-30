@@ -40,7 +40,6 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _model.getMyMainLinkRes = await LinksAPIGroup.getMyMainLinkCall.call(
         authToken: currentJwtToken,
-        cache: true, // Enable caching for better performance
       );
 
       if ((_model.getMyMainLinkRes?.succeeded ?? true)) {

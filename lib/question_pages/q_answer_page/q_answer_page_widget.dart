@@ -45,8 +45,11 @@ class _QAnswerPageWidgetState extends State<QAnswerPageWidget> with RouteAware {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await _loadAnswerData();
-      await _loadCurrentMood();
+      // Parallel API calls for better performance
+      await Future.wait([
+        _loadAnswerData(),
+        _loadCurrentMood(),
+      ]);
     });
   }
   

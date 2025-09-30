@@ -37,69 +37,84 @@ class _QMainPageWidgetState extends State<QMainPageWidget> with RouteAware {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.apiResultiid = await QuestionsGroup.generateDailyQuestionCall.call(
-        linkId: FFAppState().linkId,
-        authToken: currentJwtToken,
-      );
-
-      _model.getMyMainLinkRes = await LinksAPIGroup.getMyMainLinkCall.call(
-        authToken: currentJwtToken,
-      );
-
-      if ((_model.getMyMainLinkRes?.succeeded ?? true)) {
-        FFAppState().linkUsers = LinksAPIGroup.getMyMainLinkCall
-            .others(
-              (_model.getMyMainLinkRes?.jsonBody ?? ''),
-            )!
-            .toList()
-            .cast<LinkUserStruct>();
-        FFAppState().linkname = LinksAPIGroup.getMyMainLinkCall.linkName(
-          (_model.getMyMainLinkRes?.jsonBody ?? ''),
-        )!;
-        safeSetState(() {});
-        _model.userProfile =
-            await LinkUserProfileAPIGroup.getOrCreateLinkUserCall.call(
+      // Parallel API calls for better performance
+      final futures = await Future.wait([
+        QuestionsGroup.generateDailyQuestionCall.call(
+          linkId: FFAppState().linkId,
+          authToken: currentJwtToken,
+        ),
+        // Only call getMyMainLinkCall if not already loaded
+        FFAppState().linkUsers.isEmpty ? LinksAPIGroup.getMyMainLinkCall.call(
+          authToken: currentJwtToken,
+        ) : Future.value(null),
+        LinkUserProfileAPIGroup.getOrCreateLinkUserCall.call(
           linkId: FFAppState().linkId,
           targetUserId: currentUserUid,
           authToken: currentJwtToken,
-        );
+        ),
+      ]);
 
-        if ((_model.userProfile?.succeeded ?? true)) {
-          final userInfoData = getJsonField(
-            (_model.userProfile?.jsonBody ?? ''),
-            r'''$.data''',
-          );
-          if (userInfoData != null) {
-            FFAppState().userInfo = UserInfoStruct.maybeFromMap(userInfoData) ?? UserInfoStruct();
-          }
-          FFAppState().selectedBloodTypeAbo =
-              LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
-            (_model.userProfile?.jsonBody ?? ''),
-          ) ?? '';
-          FFAppState().selectedBloodTypeRh =
-              LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
-            (_model.userProfile?.jsonBody ?? ''),
-          ) ?? '';
-          safeSetState(() {});
-        } else {
-          await showDialog(
-            context: context,
-            builder: (alertDialogContext) {
-              return AlertDialog(
-                title: Text('에러'),
-                content: Text('유저정보를 불러오는데 실패했습니다.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(alertDialogContext),
-                    child: Text('Ok'),
-                  ),
-                ],
-              );
-            },
-          );
+      _model.apiResultiid = futures[0] as ApiCallResponse?;
+      _model.getMyMainLinkRes = futures[1] as ApiCallResponse?;
+      _model.userProfile = futures[2] as ApiCallResponse?;
+
+      // Process getMyMainLinkRes only if it was called
+      if (_model.getMyMainLinkRes != null && (_model.getMyMainLinkRes?.succeeded ?? true)) {
+        final jsonBody = _model.getMyMainLinkRes?.jsonBody ?? '';
+        
+        // Parse API response once and reuse the results
+        final linkUserOthers = LinksAPIGroup.getMyMainLinkCall.others(jsonBody);
+        final linkName = LinksAPIGroup.getMyMainLinkCall.linkName(jsonBody);
+        
+        if (linkUserOthers != null) {
+          FFAppState().linkUsers = linkUserOthers.toList().cast<LinkUserStruct>();
         }
+        if (linkName != null) {
+          FFAppState().linkname = linkName;
+        }
+        safeSetState(() {});
+      }
+
+      // Process user profile
+      if ((_model.userProfile?.succeeded ?? true)) {
+        final userInfoData = getJsonField(
+          (_model.userProfile?.jsonBody ?? ''),
+          r'''$.data''',
+        );
+        if (userInfoData != null) {
+          FFAppState().userInfo = UserInfoStruct.maybeFromMap(userInfoData) ?? UserInfoStruct();
+        }
+        
+        final bloodTypeAbo = LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeAbo(
+          (_model.userProfile?.jsonBody ?? ''),
+        );
+        if (bloodTypeAbo != null) {
+          FFAppState().selectedBloodTypeAbo = bloodTypeAbo;
+        }
+        
+        final bloodTypeRh = LinkUserProfileAPIGroup.getOrCreateLinkUserCall.bloodTypeRh(
+          (_model.userProfile?.jsonBody ?? ''),
+        );
+        if (bloodTypeRh != null) {
+          FFAppState().selectedBloodTypeRh = bloodTypeRh;
+        }
+        safeSetState(() {});
       } else {
-        context.safePop();
+        await showDialog(
+          context: context,
+          builder: (alertDialogContext) {
+            return AlertDialog(
+              title: Text('에러'),
+              content: Text('유저정보를 불러오는데 실패했습니다.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(alertDialogContext),
+                  child: Text('Ok'),
+                ),
+              ],
+            );
+          },
+        );
       }
     });
   }
