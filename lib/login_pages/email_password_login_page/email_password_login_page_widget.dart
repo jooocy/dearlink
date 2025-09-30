@@ -241,20 +241,13 @@ class _EmailPasswordLoginPageWidgetState
                           }
 
                           try {
-                            print('=== DEBUG: Starting Supabase email sign in ===');
-                            print('=== DEBUG: Email: "$emailText" ===');
-                            print('=== DEBUG: Password length: ${passwordText.length} ===');
-                            
                             // Use Supabase email sign in
                             final user = await emailSignInFunc(
                               emailText,
                               passwordText,
                             );
 
-                            print('=== DEBUG: Supabase sign in result: $user ===');
-                            
                             if (user != null) {
-                              print('=== DEBUG: User signed in successfully, checking links ===');
                               // User successfully signed in
                               // Check if user has links
                               _model.myLinksResponse = await LinksAPIGroup.myLinksCall.call(
@@ -275,7 +268,6 @@ class _EmailPasswordLoginPageWidgetState
                                 context.pushNamed(LLinkTargetPageWidget.routeName);
                               }
                             } else {
-                              print('=== DEBUG: User sign in failed - user is null ===');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('이메일 또는 비밀번호가 올바르지 않습니다.'),
@@ -284,10 +276,7 @@ class _EmailPasswordLoginPageWidgetState
                               );
                             }
                           } catch (e) {
-                            print('=== DEBUG: Error during login: $e ===');
-                            print('=== DEBUG: Error type: ${e.runtimeType} ===');
                             if (e.toString().contains('400')) {
-                              print('=== DEBUG: 400 Bad Request error detected ===');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('잘못된 요청입니다. 이메일과 비밀번호를 확인해주세요.'),

@@ -30,7 +30,6 @@ class _EmailPasswordRegisterPageWidgetState
   @override
   void initState() {
     super.initState();
-    print('=== DEBUG: EmailPasswordRegisterPage initState called ===');
     _model = createModel(context, () => EmailPasswordRegisterPageModel());
     
     // Initialize controllers
@@ -42,12 +41,6 @@ class _EmailPasswordRegisterPageWidgetState
     _model.confirmPasswordFocusNode ??= FocusNode();
     _model.nicknameController ??= TextEditingController();
     _model.nicknameFocusNode ??= FocusNode();
-    
-    print('=== DEBUG: Model created: $_model ===');
-    print('=== DEBUG: Email controller after init: ${_model.emailController} ===');
-    print('=== DEBUG: Password controller after init: ${_model.passwordController} ===');
-    print('=== DEBUG: Confirm password controller after init: ${_model.confirmPasswordController} ===');
-    print('=== DEBUG: Nickname controller after init: ${_model.nicknameController} ===');
   }
 
   @override
@@ -367,33 +360,15 @@ class _EmailPasswordRegisterPageWidgetState
                       // Register Button
                       FFButtonWidget(
                         onPressed: () async {
-                          // Debug logs
-                          print('=== DEBUG: Register button pressed ===');
-                          print('=== DEBUG: Email controller: ${_model.emailController} ===');
-                          print('=== DEBUG: Password controller: ${_model.passwordController} ===');
-                          print('=== DEBUG: Confirm password controller: ${_model.confirmPasswordController} ===');
-                          print('=== DEBUG: Nickname controller: ${_model.nicknameController} ===');
-                          
                           final emailText = _model.emailController?.text ?? '';
                           final passwordText = _model.passwordController?.text ?? '';
                           final confirmPasswordText = _model.confirmPasswordController?.text ?? '';
                           final nicknameText = _model.nicknameController?.text ?? '';
                           
-                          print('=== DEBUG: Email text: "$emailText" ===');
-                          print('=== DEBUG: Password text: "$passwordText" ===');
-                          print('=== DEBUG: Confirm password text: "$confirmPasswordText" ===');
-                          print('=== DEBUG: Nickname text: "$nicknameText" ===');
-                          
-                          print('=== DEBUG: Email isEmpty: ${emailText.isEmpty} ===');
-                          print('=== DEBUG: Password isEmpty: ${passwordText.isEmpty} ===');
-                          print('=== DEBUG: Confirm password isEmpty: ${confirmPasswordText.isEmpty} ===');
-                          print('=== DEBUG: Nickname isEmpty: ${nicknameText.isEmpty} ===');
-                          
                           if (emailText.isEmpty ||
                               passwordText.isEmpty ||
                               confirmPasswordText.isEmpty ||
                               nicknameText.isEmpty) {
-                            print('=== DEBUG: Validation failed - some fields are empty ===');
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('모든 필드를 입력해주세요.'),
@@ -402,11 +377,8 @@ class _EmailPasswordRegisterPageWidgetState
                             );
                             return;
                           }
-                          
-                          print('=== DEBUG: All fields validation passed ===');
 
                           if (passwordText != confirmPasswordText) {
-                            print('=== DEBUG: Password mismatch - password: "$passwordText", confirm: "$confirmPasswordText" ===');
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('비밀번호가 일치하지 않습니다.'),
@@ -415,24 +387,15 @@ class _EmailPasswordRegisterPageWidgetState
                             );
                             return;
                           }
-                          
-                          print('=== DEBUG: Password validation passed ===');
 
                           try {
-                            print('=== DEBUG: Starting Supabase email create account ===');
-                            print('=== DEBUG: Email: "$emailText" ===');
-                            print('=== DEBUG: Password length: ${passwordText.length} ===');
-                            
                             // Use Supabase email create account
                             final user = await emailCreateAccountFunc(
                               emailText,
                               passwordText,
                             );
 
-                            print('=== DEBUG: Supabase user creation result: $user ===');
-                            
                             if (user != null) {
-                              print('=== DEBUG: User created successfully, calling findOrCreateByEmailCall ===');
                               // Create user profile with nickname via API
                               _model.registerResponse = await UsersAPIGroup
                                   .findOrCreateByEmailCall
@@ -451,7 +414,6 @@ class _EmailPasswordRegisterPageWidgetState
                               // Go back to login page
                               context.safePop();
                             } else {
-                              print('=== DEBUG: User creation failed - user is null ===');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('이메일 확인이 필요합니다. 이메일을 확인해주세요.'),
@@ -460,7 +422,6 @@ class _EmailPasswordRegisterPageWidgetState
                               );
                             }
                           } catch (e) {
-                            print('=== DEBUG: Error during registration: $e ===');
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('회원가입 중 오류가 발생했습니다: ${e.toString()}'),

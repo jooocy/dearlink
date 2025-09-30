@@ -4,17 +4,9 @@ Future<User?> emailSignInFunc(
   String email,
   String password,
 ) async {
-  try {
-    print('=== DEBUG: emailSignInFunc called with email: $email ===');
-    final AuthResponse res = await SupaFlow.client.auth
-        .signInWithPassword(email: email, password: password);
-    print('=== DEBUG: Supabase signInWithPassword response: ${res.user} ===');
-    print('=== DEBUG: AuthResponse session: ${res.session} ===');
-    return res.user;
-  } catch (e) {
-    print('=== DEBUG: emailSignInFunc error: $e ===');
-    rethrow;
-  }
+  final AuthResponse res = await SupaFlow.client.auth
+      .signInWithPassword(email: email, password: password);
+  return res.user;
 }
 
 Future<User?> emailCreateAccountFunc(

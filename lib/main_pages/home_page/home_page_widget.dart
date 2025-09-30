@@ -40,36 +40,29 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _model.getMyMainLinkRes = await LinksAPIGroup.getMyMainLinkCall.call(
         authToken: currentJwtToken,
+        cache: true, // Enable caching for better performance
       );
 
       if ((_model.getMyMainLinkRes?.succeeded ?? true)) {
-        FFAppState().linkUsers = LinksAPIGroup.getMyMainLinkCall
-            .linkUsers(
-              (_model.getMyMainLinkRes?.jsonBody ?? ''),
-            )!
+        final jsonBody = _model.getMyMainLinkRes?.jsonBody ?? '';
+        
+        // Parse API response once and reuse the results
+        final linkUsers = LinksAPIGroup.getMyMainLinkCall.linkUsers(jsonBody)!
             .toList()
             .cast<LinkUserStruct>();
-        FFAppState().linkname = LinksAPIGroup.getMyMainLinkCall.linkName(
-          (_model.getMyMainLinkRes?.jsonBody ?? ''),
-        )!;
-        FFAppState().linkUserOthers = LinksAPIGroup.getMyMainLinkCall
-            .others(
-              (_model.getMyMainLinkRes?.jsonBody ?? ''),
-            )!
+        final linkUserOthers = LinksAPIGroup.getMyMainLinkCall.others(jsonBody)!
             .toList()
             .cast<LinkUserStruct>();
-        FFAppState().linkId = LinksAPIGroup.getMyMainLinkCall.linkId(
-          (_model.getMyMainLinkRes?.jsonBody ?? ''),
-        )!;
-        safeSetState(() {});
-        _model.hasLinkusers = LinksAPIGroup.getMyMainLinkCall.others(
-                  (_model.getMyMainLinkRes?.jsonBody ?? ''),
-                ) !=
-                null &&
-            (LinksAPIGroup.getMyMainLinkCall.others(
-              (_model.getMyMainLinkRes?.jsonBody ?? ''),
-            ))!
-                .isNotEmpty;
+        final linkName = LinksAPIGroup.getMyMainLinkCall.linkName(jsonBody)!;
+        final linkId = LinksAPIGroup.getMyMainLinkCall.linkId(jsonBody)!;
+        
+        // Set all state variables at once
+        FFAppState().linkUsers = linkUsers;
+        FFAppState().linkUserOthers = linkUserOthers;
+        FFAppState().linkname = linkName;
+        FFAppState().linkId = linkId;
+        _model.hasLinkusers = linkUserOthers.isNotEmpty;
+        
         safeSetState(() {});
         
         // Load moods for all users
@@ -134,48 +127,33 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
   // Load moods for all users
   Future<void> _loadUserMoods() async {
     try {
-      print('=== DEBUG: HomePage - Starting to load user moods ===');
-      print('=== DEBUG: LinkId: ${FFAppState().linkId} ===');
-      
       final allMoodsResponse = await MoodAPIGroup.getAllMoodsCall.call(
         linkId: FFAppState().linkId,
         authToken: currentJwtToken,
       );
-      
-      print('=== DEBUG: All moods API response: ${allMoodsResponse?.succeeded} ===');
-      print('=== DEBUG: All moods API body: ${allMoodsResponse?.jsonBody} ===');
       
       if (allMoodsResponse?.succeeded ?? false) {
         final moods = MoodAPIGroup.getAllMoodsCall.moods(
           allMoodsResponse?.jsonBody ?? '',
         );
         
-        print('=== DEBUG: Parsed moods: $moods ===');
-        print('=== DEBUG: Moods count: ${moods?.length ?? 0} ===');
-        
         Map<String, String> userMoods = {};
         
         if (moods != null) {
           for (final mood in moods) {
-            print('=== DEBUG: Processing mood for userId: ${mood.userId}, moodLabel: ${mood.moodLabel} ===');
             if (mood.userId?.isNotEmpty == true && mood.moodLabel?.isNotEmpty == true) {
               userMoods[mood.userId!] = mood.moodLabel!;
-              print('=== DEBUG: Added mood for ${mood.userId}: ${mood.moodLabel} ===');
             }
           }
         }
         
-        print('=== DEBUG: Final userMoods map: $userMoods ===');
         _model.userMoods = userMoods;
       } else {
-        print('=== DEBUG: All moods API failed ===');
         _model.userMoods = {};
       }
       
       safeSetState(() {});
-      print('=== DEBUG: HomePage - Finished loading user moods ===');
     } catch (e) {
-      print('=== DEBUG: Error loading user moods: $e ===');
       _model.userMoods = {};
     }
   }
@@ -771,7 +749,6 @@ class _HomePageWidgetState extends State<HomePageWidget> with RouteAware {
                                                 final hasMood = userMood?.isNotEmpty == true;
                                                 final displayText = hasMood ? '#$userMood' : '답변 전이에요.';
                                                 
-                                                print('=== DEBUG: HomePage - Displaying mood for user ${linkUsersItem.userId} (${linkUsersItem.nickname}): $displayText ===');
                                                 
                                                 return Padding(
                                                   padding: EdgeInsets.symmetric(horizontal: 4.0),
